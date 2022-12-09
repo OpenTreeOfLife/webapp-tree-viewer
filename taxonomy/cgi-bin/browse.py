@@ -1,4 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+
+# UPDATED to use system python3. ASSUMES that requests module has been installed.
 
 # Brutally primitive reference taxonomy browser.
 # Basically just a simple shim on the taxomachine 'taxon' method.
@@ -26,9 +28,8 @@ dev_amendment_url_template =        'https://github.com/OpenTreeOfLife/amendment
 
 import os
 import sys
-import urllib
+import cgi, cgitb, html
 from io import StringIO
-#from io import BytesIO  # TODO will we need this?
 
 import html
 import requests
@@ -51,7 +52,7 @@ def browse(id=None, name=None, limit=None, api_base=None):
         if server_name != None and 'devtree' in server_name:
             server_name = server_name.replace('devtree', 'devapi')
             api_base = 'https://%s/' % server_name
-            output.write('using API server %s\n' % server_name)
+            output.write('using API server %s' % server_name)
         else:
             api_base = default_api_base_url
 
@@ -92,7 +93,7 @@ def report_invalid_arg(output, info):
     start_el(output, 'h1')
     output.write('Open Tree taxonomy: <strong class="error">invalid argument</strong>')
     end_el(output, 'h1')
-    output.write('<p class="error">There was a problem with the name or ID provided:</p>\n')
+    output.write('<p class="error">There was a problem with the name or ID provided:</p>')
     start_el(output, 'pre', 'error')
     output.write(html.escape(json.dumps(info, sort_keys=True, indent=4)))
     end_el(output, 'pre')
@@ -104,10 +105,10 @@ def browse_by_name(name, limit, api_base, output):
         return None
     matches = result[u'matches']
     if len(matches) == 0:
-        output.write('no TNRS matches for %s\n' % html.escape(name))
+        output.write('no TNRS matches for %s' % html.escape(name))
         return None
     elif len(matches) > 1:
-        output.write('Matches for %s: \n' % html.escape(name))
+        output.write('Matches for %s: ' % html.escape(name))
         start_el(output, 'ul')
         for match in matches:
             taxon = match[u'taxon']
@@ -135,7 +136,7 @@ def look_up_name(name, api_base):
 
 def browse_by_id(id, limit, api_base, output):
     info = get_taxon_info(id, 'ott_id', api_base)
-    #print(json.dumps(info, sort_keys=True, indent=4))
+    #print(json.dumps(info, sort_keys=True, indent=5))
     display_taxon_info(info, limit, output, api_base)
 
 def browse_by_qid(id, limit, api_base, output):
@@ -169,7 +170,7 @@ def display_taxon_info(info, limit, output, api_base):
         start_el(output, 'p', 'legend')
         version = get_taxonomy_version(api_base)
         output.write('The current taxonomy version is <a target="_blank" href="https://tree.opentreeoflife.org/about/taxonomy-version/%s">%s (click for more information)</a>. ' % (version, version,))
-        output.write('See the OTT documentation for <a href="https://github.com/OpenTreeOfLife/reference-taxonomy/blob/master/doc/taxon-flags.md#taxon-flags">an explanation of the taxon flags used</a> below, e.g., <span class="flag">extinct</span>\n')
+        output.write('See the OTT documentation for <a href="https://github.com/OpenTreeOfLife/reference-taxonomy/blob/master/doc/taxon-flags.md#taxon-flags">an explanation of the taxon flags used</a> below, e.g., <span class="flag">extinct</span>')
         end_el(output, 'p')
 
         output.write('<h3>Taxon details</h3>')
@@ -189,7 +190,7 @@ def display_taxon_info(info, limit, output, api_base):
             if len(synonyms) > 0:
                 output.write('<h3>Synonym(s)</h3>')
                 start_el(output, 'p', 'synonyms')
-                output.write("%s\n" % ', '.join(map(link_to_name, synonyms)))
+                output.write("%s" % ', '.join(map(link_to_name, synonyms)))
                 end_el(output, 'p')
         if u'lineage' in info:
             first = True
@@ -203,10 +204,10 @@ def display_taxon_info(info, limit, output, api_base):
                     output.write(' &gt; ')
                 output.write(link_to_taxon(ancestor[u'ott_id'], ancestor[u'name']))
                 first = False
-            output.write('\n')
+            output.write('')
             end_el(output, 'p')
         else:
-            output.write('missing lineage field %s\n', info.keys())
+            output.write('missing lineage field %s', info.keys())
         any_included = False
         any_suppressed = False
         if limit == None: limit = 200
@@ -259,7 +260,7 @@ def display_taxon_info(info, limit, output, api_base):
                                                        (len(children)-limit)),
                                                       limit=100000))
                 end_el(output, 'p')
-        output.write("\n")
+        output.write("")
     else:
         report_invalid_arg(output, info)
 
@@ -310,7 +311,7 @@ def display_basic_info(info, output):
     start_el(output, 'span', 'flags')
     output.write('%s ' % ', '.join(map(lambda f:'<span class="flag">%s</span>' % f.lower(), info[u'flags'])))
     end_el(output, 'span')
-    output.write('\n')
+    output.write('')
 
 def source_link(source_id):
     global _AMENDMENT_REPO_URL_TEMPLATE
@@ -469,32 +470,22 @@ local_stylesheet = """
 """
 
 if __name__ == '__main__':
-    # force all output to Unicode
-    sys.stdout.reconfigure(encoding='utf-8')
-    query_string = None
-    try:
-        query_string = os.environ['QUERY_STRING']
-    except KeyError:
-        print("WARNING! This script expects the QUERY_STRING environment variable via Apache CGI!")
-        # Enable this sample string to test with 'cellular organisms'
-        #query_string = "id=844192"
-    if query_string:
-        form = urllib.parse.parse_qsl(qs=query_string)
-        id = name = limit = api_base = None
-        if "id" in form: id = form["id"].value
-        if "name" in form: name = form["name"].value
-        if "limit" in form: limit = form["limit"].value
-        if "api_base" in form: api_base = form["api_base"].value
-        # Content-type information is not helpful in our current setup?
-        sys.stdout.write('Content-type: text/html; charset=utf8\r\n')
-        sys.stdout.write('\r\n')
-        output = sys.stdout
-        start_el(output, 'html')
-        start_el(output, 'head', '')
-        output.write('<link rel="stylesheet" href="//opentreeoflife.github.io/css/main.css" />')
-        output.write(local_stylesheet)
-        end_el(output, 'head')
-        start_el(output, 'body')
-        print(browse(id, name, limit, api_base))
-        end_el(output, 'body')
-        end_el(output, 'html')
+    form = cgi.FieldStorage()
+    id = name = limit = api_base = None
+    if "id" in form: id = form["id"].value
+    if "name" in form: name = form["name"].value
+    if "limit" in form: limit = form["limit"].value
+    if "api_base" in form: api_base = form["api_base"].value
+    # Content-type information is not helpful in our current setup?
+    sys.stdout.write('Content-type: text/html; charset=utf8\r\n')
+    sys.stdout.write('\r\n')
+    output = sys.stdout
+    start_el(output, 'html')
+    start_el(output, 'head', '')
+    output.write('<link rel="stylesheet" href="//opentreeoflife.github.io/css/main.css" />')
+    output.write(local_stylesheet)
+    end_el(output, 'head')
+    start_el(output, 'body')
+    output.write(browse(id, name, limit, api_base))
+    end_el(output, 'body')
+    end_el(output, 'html')
