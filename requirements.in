@@ -9,3 +9,5 @@ pipdeptree
 cookiecutter
 ConfigParser
 markdown
+oauthlib>=3
+pyramid-oauthlib
