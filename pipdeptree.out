@@ -28,6 +28,25 @@ Markdown==3.5.1
     - zipp [required: >=0.5, installed: 3.17.0]
 pip==23.3.1
 pipdeptree==2.3.1
+pyramid-oauthlib==1.0.0
+  - oauthlib [required: >=3, installed: 3.2.2]
+  - pyramid [required: >=1.4.0, installed: 2.0]
+    - hupper [required: >=1.5, installed: 1.10.3]
+    - plaster [required: Any, installed: 1.0]
+      - setuptools [required: Any, installed: 60.10.0]
+    - plaster-pastedeploy [required: Any, installed: 0.7]
+      - PasteDeploy [required: >=2.0, installed: 2.1.1]
+        - setuptools [required: Any, installed: 60.10.0]
+      - plaster [required: >=0.5, installed: 1.0]
+        - setuptools [required: Any, installed: 60.10.0]
+    - setuptools [required: Any, installed: 60.10.0]
+    - translationstring [required: >=0.4, installed: 1.4]
+    - venusian [required: >=1.0, installed: 3.0.0]
+    - webob [required: >=1.8.3, installed: 1.8.7]
+    - zope.deprecation [required: >=3.5.0, installed: 4.4.0]
+      - setuptools [required: Any, installed: 60.10.0]
+    - zope.interface [required: >=3.8.0, installed: 5.4.0]
+      - setuptools [required: Any, installed: 60.10.0]
 pytest-cov==3.0.0
   - coverage [required: >=5.2.1, installed: 6.4.4]
   - pytest [required: >=4.6, installed: 7.1.3]
