@@ -2,8 +2,29 @@
 import os
 import re
 import configparser
+import functools
+import json
+from pyramid.request import Request
+from pyramid.httpexceptions import (
+    HTTPNotFound,
+    HTTPSeeOther,
+    )
+import logging
+log = logging.getLogger(__name__)
+
 
 _CONF_OBJ_DICT = {}
+
+def get_github_client_secret():
+    client_secret_path = "../private/GITHUB_CLIENT_SECRET"
+    if os.path.isfile(client_secret_path):
+        GITHUB_CLIENT_SECRET = open(client_secret_path).read().strip()
+        return GITHUB_CLIENT_SECRET
+    else:
+        abs_path = os.path.abspath(client_secret_path)
+        err_msg = "Client secret file ({}) not found!".format(abs_path)
+        print(err_msg)
+        raise Exception(err_msg)
 
 def get_conf(request):
     # get app-specific settings (e.g. API URLs)
@@ -37,12 +58,9 @@ def get_conf(request):
             err_msg = "Webapp config file ({}) is broken or incomplete (missing [apis] section)".format(config_file_found)
             print(err_msg)
             raise Exception(err_msg)
+        # add our GitHub client secret from a separate file (kept out of source repo)
+        conf.set("apis", "github_client_secret", get_github_client_secret())
     return _CONF_OBJ_DICT.get(app_name)
-
-def get_conf_as_dict(request):
-    # convert config file to dict (for use in Jinja templates)
-    config = get_conf(request)
-    return {s:dict(config.items(s)) for s in config.sections()}
 
 def get_domain_banner_text(request):
     # Add an optional CSS banner to indicate a test domain, or none if
@@ -133,26 +151,55 @@ def get_opentree_services_method_urls(request):
 
     return method_urls
 
-def get_user_display_name():
+def add_local_comments_markup(request, view_dict={}):
+    # create a subrequest to pass local-comments HTML to the renderer
+    # copy relevant parts of current request (to correctly locate comments)
+    comments_path = '/opentree/plugin_localcomments'
+    specified_filter = view_dict.get('filter', None)
+
+    """
+    log.debug("  request method (HTTP verb): {}".format(request.method or 'NONE'))
+    log.debug("  specified_filter: {}".format(specified_filter or 'NONE'))
+    log.debug("  request.content_type: {}".format(request.content_type or 'NONE'))
+    log.debug("  RESPONSE.content_type: {}".format(request.response.content_type or 'NONE'))
+    """
+
+    subreq = Request.blank(comments_path,
+                           #environ=request.environ,  # OVERRIDES our desired URL!
+                           headers=request.headers,
+                           POST=request.POST,         # TODO: use POST for subrequest?
+                          )
+
+    # Use its environment to store hints to help "locate" the new comments
+    if specified_filter:
+        # if specified, this should override any existing 'filter' value
+        #request.POST['filter'] = specified_filter  # FAILS if not already a POST/form
+        subreq.environ['filter'] = specified_filter
+    subreq.environ['original_url'] = request.url
+
+    comments_response = request.invoke_subrequest(subreq)
+    view_dict.update({
+        'local_comments_markup': comments_response.body.decode('utf-8')
+        })
+    #import pdb; pdb.set_trace()
+    print("local comments char count? {}".format(len(view_dict['local_comments_markup'])))
+
+    # is this even required? any dict argument is already changed!
+    return view_dict
+
+def user_is_logged_in(request):
+    return request.session.get('auth_user', None) and True or False
+
+def get_auth_user(request):
+    return request.session.get('auth_user', None)
+
+def get_user_display_name(request):
     # Determine the best possible name to show for the current logged-in user.
-    # This is for display purposes and credit in study Nexson. It's a bit
-    # convoluted due to GitHub's various and optional name fields.
-    ###from gluon import current
-    ###auth = current.session.auth or None
-    ###if (not auth) or (not auth.get('user', None)):
-        ###return 'ANONYMOUS'
-    ###if auth.user.name:
-        #### this is a preset display name
-        ###return auth.user.name
-    #### N.B. that auth.user.first_name and auth.user.last_name fields are not
-    #### reliable in our apps! They're included for web2py compatibility, but we
-    #### defer to the GitHub User API and use the 'name' field for this.
-    ###if auth.user.username:
-        #### compact userid is our last resort
-        ###return auth.user.username
-    #### no name or id found (this should never happen)
-    ###return 'UNKNOWN'
-    return 'TODO: Display Name'
+    # This is for display purposes and credit in study Nexson.
+    try:
+        return request.session['auth_user'].get('display_name')
+    except:
+        return 'ANONYMOUS'
 
 def fetch_current_TNRS_context_names(request):
     try:
@@ -210,4 +257,153 @@ def get_data_deposit_message(raw_deposit_doi):
     # TODO: Add other substitutions?
 
     return ('<a target="_blank" href="%s">Data deposit DOI/URL</a>' % raw_deposit_doi)
+
+# https://authomatic.github.io/authomatic/reference/adapters.html
+# https://authomatic.github.io/authomatic/reference/providers.html#authomatic.providers.oauth2.GitHub
+from authomatic.providers import oauth2
+AUTH_CONFIG = {
+    'github': {
+        'id': 1,  # REQUIRED for login_result.user.to_dict(), but usually login_result.user.data is plenty of information
+        'class_': oauth2.GitHub,
+        'consumer_key': 'Iv1.226d54b87d23855d',   # WAS github_client_id
+        'consumer_secret': get_github_client_secret(),
+        'access_headers': {'User-Agent': 'Awesome-Octocat-App'},
+        'scope': ['user', 'user:email' ],
+        #'redirect_uri': 'https://devtree.opentreeoflife.org/opentree/user/login',   # MATCH the app configuration exactly
+        ## NB - This is apparently replaced by the *current* URL, so its route must match exactly..
+        ## It's POSSIBLE that we can define multiple redirect-uri's in Github app config, then specify one of them here
+    }
+ }
+
+def login_required(decorated_function):
+    """
+    A decorator for protected views. This should check for OAuth credentials
+    and (if found) when they expire. If expiry is imminent, refresh them now!
+    If credentials aren't found, login via OAuth, then bounce back to the current URL.
+    """
+    @functools.wraps(decorated_function)
+    def wrapper(request, *args, **kwargs):
+        # IF user is logged in, call this view normally; otherwise login (or refresh credentials)
+        logged_in = user_is_logged_in(request)
+        # NOTE that we're currently using non-expiring credentials!
+        if logged_in:
+            return decorated_function(request, *args, **kwargs)
+        else:
+            # TODO: redirect to login view (then bounce back to the current URL)
+            relative_url = request.route_path('oauth_login', _query={'_next': request.url})
+            return HTTPSeeOther(location=relative_url)
+
+    return wrapper
+
+
+def fetch_github_app_auth_token(request):
+    # fetch a new token, or confirm that a known token is still current (or replace it)
+    # see https://developer.github.com/v3/apps/#create-a-new-installation-token
+    # TODO: include 'repository_ids' "feedback" (?)
+
+    # build a new JWT, since they expire
+    import python_jwt as jwt, jwcrypto.jwk as jwk, datetime, requests
+    #key = jwk.JWK.generate(kty='RSA', size=2048)
+    conf = get_conf(request)
+    try:
+        github_app_id = conf.get("apis", "github_app_id")
+    except:
+        raise Exception("[apis] github_app_id not found in config!")
+
+    try:
+        app_installation_id = conf.get("apis", "github_app_installation_id")
+    except:
+        raise Exception("[apis] github_app_installation_id not found in config!")
+
+    # load our GitHub app's private key from a separate file (kept out of source repo)
+    if os.path.isfile("../private/GITHUB_APP_PRIVATE_KEY_PEM"):
+        try:
+            private_key_pem = open("../private/GITHUB_APP_PRIVATE_KEY_PEM", "rb").read().strip()
+            private_key = jwk.JWK.from_pem(private_key_pem)
+            #key_json = private_key.export(private_key=True)
+        except:
+            raise Exception("Invalid private-key .pem!")
+    else:
+        raise Exception("Private-key .pem file not found!")
+
+    payload = {
+        # issued at time
+        'iat': datetime.timedelta(minutes=0),
+        # JWT expiration time (10 min max)
+        'exp': datetime.timedelta(minutes=10),
+        # issuer? (GitHub app identifier)
+        'iss': github_app_id,
+    }
+    app_jwt = jwt.generate_jwt(payload, private_key, 'RS256', datetime.timedelta(minutes=5))
+    # use this JWT to request an auth token for the current GitHub app (bot)
+    resp = requests.post( ("https://api.github.com/app/installations/%s/access_tokens" % app_installation_id),
+                          headers={'Authorization': ('Bearer %s' % app_jwt),
+                                   'Accept': "application/vnd.github.machine-man-preview+json"})
+    resp_json = resp.json()
+    try:
+        new_token = resp_json.get("token")
+    except:
+        raise Exception("Installation token not found in JSON response!")
+    return new_token
+
+def log_request_payloads(request):
+    # Report all forms of request payload
+    log.debug(">>> request.matchdict:")
+    log.debug(request.matchdict)
+    log.debug(">>> request.GET:")
+    log.debug(request.GET)
+    log.debug(">>> request.POST:")
+    log.debug(request.POST)
+    log.debug(">>> request.json:")
+    try:
+        log.debug(request.json)
+    except json.decoder.JSONDecodeError:
+        log.debug('No JSON found.')
+    except:
+        log.debug('JSON is funky!')
+
+# python3 compatible pretty dates,
+# adapted from https://stackoverflow.com/a/5164027
+#
+# NB - This assumes an un-adjusted UTC date (ie,
+# disregard locale and daylight savings)
+import datetime
+def pretty_date(d):
+    now = datetime.datetime.now(datetime.timezone.utc)
+    diff = now - d
+    s = diff.seconds
+    days_in_a_year = 365  # close enough!
+    days_in_a_month = 30  # close enough!
+    days_in_a_week  =  7  # close enough!
+    if diff.days > (days_in_a_year * 2):
+        how_many_years = int(diff.days / days_in_a_year)
+        return "{} years ago".format(how_many_years)
+    elif diff.days > days_in_a_year:
+        return '1 year ago'
+    elif diff.days > (days_in_a_month * 2):
+        how_many_months = int(diff.days / days_in_a_month)
+        return "{} months ago".format(how_many_months)
+    elif diff.days > days_in_a_month:
+        return '1 month ago'
+    elif diff.days > (days_in_a_week * 2):
+        how_many_weeks = int(diff.days / days_in_a_week)
+        return "{} weeks ago".format(how_many_weeks)
+    elif diff.days > days_in_a_week:
+        return '1 week ago'
+    elif diff.days == 1:
+        return '1 day ago'
+    elif diff.days > 1:
+        return '{} days ago'.format(diff.days)
+    elif s <= 1:
+        return 'just now'
+    elif s < 60:
+        return '{} seconds ago'.format(s)
+    elif s < 120:
+        return '1 minute ago'
+    elif s < 3600:
+        return '{} minutes ago'.format(s/60)
+    elif s < 7200:
+        return '1 hour ago'
+    else:
+        return '{} hours ago'.format(round(s/3600))
 

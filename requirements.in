@@ -9,3 +9,8 @@ pipdeptree
 cookiecutter
 ConfigParser
 markdown
+authomatic
+uvicorn
+prettydate
+pytz
+pyramid_retry

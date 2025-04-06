@@ -1,16 +1,33 @@
 from pyramid.view import view_config
 from synthetic_tree_viewer.opentreewebapputil import (
     get_user_display_name,
+    get_auth_user,
     get_conf,
-    get_conf_as_dict,
     get_domain_banner_text,
     get_domain_banner_hovertext,
     get_currently_deployed_opentree_branch,
     get_opentree_services_method_urls,
     latest_CrossRef_URL,
     fetch_current_TNRS_context_names,
+    add_local_comments_markup,
+    AUTH_CONFIG,
+    login_required,
     )
 from pyramid.httpexceptions import HTTPNotFound, HTTPSeeOther
+from pyramid_retry import RetryableException
+
+import logging
+log = logging.getLogger(__name__)
+
+from authomatic import Authomatic
+from authomatic.adapters import WebObAdapter  # incl. Pyramid
+
+# auth using GitHub API, see https://authomatic.github.io/authomatic/reference/providers.html#authomatic.providers.oauth2.GitHub
+authomatic = Authomatic(
+    AUTH_CONFIG, 
+    'random OpenTree gobbledygook used for CSRF etc.',
+    debug=True
+    )
 
 def fetch_current_synthetic_tree_ids(request):
     # return the latest synthetic-tree ID (and its 'life' node ID)
@@ -65,12 +82,83 @@ def home(request):
     return HTTPSeeOther(location='/opentree/argus')
 
 @view_config(route_name='contact', renderer='synthetic_tree_viewer:templates/contact.jinja2')
+@login_required
 def contact(request):
     view_dict = get_opentree_services_method_urls(request)
     view_dict.update({
         'taxonSearchContextNames': fetch_current_TNRS_context_names(request),
         })
+    add_local_comments_markup(request, view_dict)
     return view_dict
+
+@view_config(route_name='oauth_login')  # TODO: does this need a template/renderer?
+def login(request):
+    # we'll redirect to any specified destination (or the Home page)
+    _next = request.params.get('_next')
+    if _next:
+        request.session['_next'] = _next  # stash this in case we're not ready!
+        # TODO: trim the query-string and redirect to this "bare" URL!
+        bare_url = request.route_url('oauth_login')
+        return HTTPSeeOther(location=bare_url)
+
+    log.debug("NO DESTINATION in login (but maybe in session)...")
+    # still here? then it's time to check login result and move forward
+    login_result = authomatic.login(WebObAdapter(request, request.response), 'github')
+    if login_result:
+        log.debug("!!!!! login_result.error = %s", login_result.error)
+    else:
+        log.debug("!!!!! NO login_result")
+
+    destination_url = request.session.get('_next', None) and request.session.get('_next') or '/'
+    log.debug("destination_url=%s", destination_url)
+
+    # NB - first time through, there's no login_result; but on redirect, there it is!
+    if (login_result and login_result.user):
+        # update full user info (name, email, etc) and stash in the current session
+        log.debug("TRUE login_result '%s' AND TRUE user '%s'", login_result, login_result.user)
+        login_result.user.update()
+        log.debug("User after immediate update: %s", login_result.user.data)
+        gh_user_data = login_result.user.data
+        request.session['auth_user'] = {
+            'login': gh_user_data['login'],
+            'email': gh_user_data['email'],
+            # NB - we rename some of its properties for legibility
+            'display_name': gh_user_data['name'],             # "Jim Allman"
+            'github_profile_url': gh_user_data['html_url'],   # "https://github.com/jimallman"
+            'homepage_url': gh_user_data['blog'],             # "https://www.ibang.com/"
+            'oauth_token': login_result.user.credentials.token,  # ???
+        }
+        # NOTE that we're currently using non-expiring credentials!
+
+        """ RESTORE this "flat" strings-only approach if session dict is not reliable!
+        request.session['github_login'] = gh_user_data['login']          # "jimallman"
+        request.session['github_display_name']  = gh_user_data['name']   # "Jim Allman"
+        request.session['github_email'] = gh_user_data['email']          # "jim@ibang.com"
+        request.session['github_profile_url'] = gh_user_data['html_url'] # "https://github.com/jimallman"
+        request.session['github_homepage_url'] = gh_user_data['blog']    # "https://www.ibang.com/"
+        """
+        request.session.changed()  # save the current session, to make sure we update mutable values
+
+        # clear destination once we're done logging in
+        request.session['_next'] = None   
+        return HTTPSeeOther(location=destination_url)
+
+    elif (login_result and not login_result.user):
+        # we don't (yet) have a proper user object; what should happen here!?
+        # bail and wait for proper login?
+        log.debug("TRUE login_result '%s', BUT FALSE user '%s'  :-/", login_result, login_result.user)
+        #request.make_body_seekable()
+        #raise RetryableException
+        pass
+    else:
+        ## no login_result yet; bail and wait for this
+        log.debug("FALSE login_result '%s'... probably jumping to OAuth now", login_result)
+        #request.make_body_seekable()
+        #raise RetryableException
+        pass
+
+    request.response.text ="...still waiting..."
+    return request.response
 
 @view_config(route_name='tree_view', renderer='synthetic_tree_viewer:templates/tree_view.jinja2')
 def tree_view(request):
@@ -97,7 +185,6 @@ def tree_view(request):
     view_dict.update({
         # NB - Duplicate keys will be resolved in favor of the values below!
         'conf': get_conf(request),  # needed for the footer diagnostics
-        ##'conf_as_dict': get_conf_as_dict(request),
         'project_name': 'synthetic tree viewer',
         #'session': request.session,
         'response': request.response,
@@ -165,4 +252,6 @@ def tree_view(request):
     if incomingDomSource and view_dict['nodeID']:
         view_dict['forcedByURL'] = True
 
+    view_dict['filter'] = 'skip_comments'
+    add_local_comments_markup(request, view_dict)
     return view_dict

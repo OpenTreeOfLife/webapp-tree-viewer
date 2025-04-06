@@ -199,6 +199,9 @@ function loadLocalComments( chosenFilter ) {
         }
         */
         fetchArgs.target_node_label = commentLabel;
+
+        // add URL for these comments too, just for convenient back-tracking from Github
+        fetchArgs.url = getCommentIndexURL();
     } else {
         // use the fallback 'url' index (apparently there's no tree-view here)
         ///console.log("loadLocalComments() - Loading comments based on 'url' (no argus.treeData!)");
@@ -434,8 +437,12 @@ function fixLoginLinks() {
     $('a.login-logout').each(function() {
         var $link = $(this);
         var itsHref = $link.attr('href');
+        console.log("login/logout link BEFORE:")
+        console.log(itsHref)
         itsHref = itsHref.split('?')[0];
         itsHref += ('?_next='+ currentURL);
+        console.log("login/logout link AFTER:")
+        console.log(itsHref)
         $link.attr('href', itsHref);
     });
 }

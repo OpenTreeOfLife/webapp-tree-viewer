@@ -1,0 +1,85 @@
+{# Pyramid implementation of web2py local_comments plugin
+
+   A callable Jinja2 macro seems like the closest analogy to web2py's plugins. 
+#}
+
+{% macro local_comments(filter, url) -%}
+
+{# diagnostic chatter
+  <div style="color: red; font-weight: bold; border: 1px dashed red;">
+    <p>LOCAL COMMENTS APPEAR HERE!</p>
+    <p> &nbsp; filter = {{filter}}</p>
+    <p> &nbsp; url = {{url}}</p>
+  </div>
+#}
+
+  <div id="{{ 'TODO_c59826038298' }}" style="border: 2px green solid;">
+    <div class="plugin_localcomments">
+      <div class="reply"><a class="btn btn-small reply" href="#">Add a new topic</a></div>
+      <ul>
+        <!-- comment markup (and possible replies) go here
+        {# wrap_comment_in_markup(
+            comment=TODO???
+           ) #}
+        -->
+      </ul>
+    </div>
+  </div>
+
+{%- endmacro -%}
+
+
+{% macro wrap_comment_in_markup(comment) -%}
+
+    {% set is_issue_node = 'comments' in comment %}
+    {% set child_comments = comment.get('child_comments', [ ]) %}
+
+    <li class="{{ is_issue_node and 'issue' or 'comment' }}">
+        <div class="msg-wrapper" 
+             id="r{{ comment.get('number', comment['id']) }}">
+           {% if 'title' in comment: %}
+            <div class="topic-title">{{ comment.title }}
+                <a href="{{ comment.html_url }}" target="_blank">on GitHub</a>
+            </div>
+           {% endif %}
+            <div class="{{ is_issue_node and 'body issue-body' or 'body comment-body' }}">
+                <!-- safe markup goes here??? -->
+                {{ comment.get('safe_html_body', "MISSING COMMENT BODY!") | safe }}
+            </div>
+            <div class="byline">
+                <a href="{{ comment.get('author_link') }}" target="_blank">{{ comment['author_display_name'] }}</a>
+                - {{ comment['pretty_date'] }}
+                <span class="controls">
+                  {% if is_issue_node: %}
+                    <a class="toggle" href="#">
+                      {% if child_comments: %}
+                        Hide comments
+                      {% else: %}
+                        Show/add comments
+                      {% endif %}
+                    </a>
+                    {% if comment['user']['login'] == current_user_id: %}
+                        <span> | </span>
+                    {% endif %}
+                  {% endif %}
+                  {% if comment['user']['login'] == current_user_id: %}
+                    <a class="delete" href="#">Delete</a>
+                  {% endif %}
+                </span>
+            </div>
+        </div>
+      {% if is_issue_node: %}
+        <ul style="display: {{ child_comments and 'block' or 'none' }};">
+          <!-- any replies go here (recurse?) -->
+          {% for reply in comment.child_comments %}
+              {{ wrap_comment_in_markup(comment=reply) }}
+          {% endfor %}
+        </ul>
+        <div class="reply" 
+             style="{{ '' if child_comments else 'display: none;' }}">
+            <a class="btn btn-small reply" href="#">Add a comment</a>
+        </div>
+      {% endif %}
+    </li>
+
+{%- endmacro -%}
