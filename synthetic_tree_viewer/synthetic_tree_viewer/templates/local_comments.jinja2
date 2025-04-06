@@ -2,7 +2,7 @@
 
 {# available vars: visitor_name, visitor_email, threads, ... #}
 
-<div class="plugin_localcomments" style="border: 2px dashed blue;">
+<div class="plugin_localcomments">
 {# client-side script to manage comment display and form behavior #}
   <script lang="javascript"><!--
     var action = null;
@@ -274,7 +274,7 @@
           </div>
       </form>
   </div>
-  <ul style="border: 2px dashed orange;">
+  <ul>
    {% for thread in threads: %}
     {{ comments.wrap_comment_in_markup(
         comment=thread,
