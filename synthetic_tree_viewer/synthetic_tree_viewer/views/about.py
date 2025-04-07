@@ -50,6 +50,7 @@ def _minimal_about_viewdict(request):
     view_dict.update({
         # NB - Duplicate keys will be resolved in favor of the values below!
         'conf': get_conf(request),  # needed for the footer diagnostics
+        'currently_deployed_opentree_branch': get_currently_deployed_opentree_branch(request),
         'response': request.response,
         'registry': request.registry,
         'taxonSearchContextNames': fetch_current_TNRS_context_names(request),

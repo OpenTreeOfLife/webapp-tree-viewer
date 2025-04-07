@@ -9,5 +9,6 @@ def notfound_view(request):
     request.response.status = 404
     view_dict = {
         'conf': get_conf(request),
+        'currently_deployed_opentree_branch': get_currently_deployed_opentree_branch(request),
     }
     return {'body': "404 - Not Found"}

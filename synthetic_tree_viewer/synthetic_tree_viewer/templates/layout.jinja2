@@ -559,17 +559,19 @@
             <a href="https://trypyramid.com/" target="_blank" >Pyramid</a>
         </div>
         <div id="server-details" style="display: none; clear: both; margin: 4px 0; background-color: #f5f5f5; padding: 6px 8px; border-radius: 8px;">
-            Configuration for the <strong>{{  request.application }}</strong> web app:
+            Configuration for the <strong>{{ request.registry.package_name }}</strong> web app:
             <dl>
                <dt id="deployed-branch">deployed branch of opentree webapps:</dt>
                    <dd><strong style="color: #888;">{{  currently_deployed_opentree_branch }}
                    </strong></dd>
-          {% if conf_as_dict: %}
-            {% for sec in conf_as_dict.keys(): %}
+          {% if conf: %}
+            {% for sec in conf.keys(): %}
+              {% if sec != 'DEFAULT': %}
                <dt>{{ sec }}</dt>
-                   {% for itm in conf_as_dict[sec]: %}
-                   <dd><strong style="color: #888;">{{ itm[0] }}</strong>: {{itm[1] }}</dd>
-                   {% endfor %}
+                 {% for name, value in conf[sec].items(): %}
+                   <dd><strong style="color: #888;">{{ name }}</strong>: {{ value }}</dd>
+                 {% endfor %}
+              {% endif %}
             {% endfor %}
           {% endif %}
             </dl>

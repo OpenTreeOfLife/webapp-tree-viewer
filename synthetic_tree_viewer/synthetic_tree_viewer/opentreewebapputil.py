@@ -13,7 +13,8 @@ import logging
 log = logging.getLogger(__name__)
 
 
-_CONF_OBJ_DICT = {}
+# hold persistent config object(s)
+_CONFIG_REGISTRY = {}
 
 def get_github_client_secret():
     client_secret_path = "../private/GITHUB_CLIENT_SECRET"
@@ -28,10 +29,10 @@ def get_github_client_secret():
 
 def get_conf(request):
     # get app-specific settings (e.g. API URLs)
-    global _CONF_OBJ_DICT
+    global _CONF_REGISTRY
 
     app_name = request.registry.package_name
-    if _CONF_OBJ_DICT.get(app_name) is None:
+    if _CONFIG_REGISTRY.get(app_name) is None:
         from configparser import ConfigParser
         conf = ConfigParser()
         # DON'T convert property names to lower-case!
@@ -48,7 +49,7 @@ def get_conf(request):
                     conf.read(test_path)
                     break;
             assert 'apis' in conf.sections()
-            _CONF_OBJ_DICT[app_name] = conf
+            _CONFIG_REGISTRY[app_name] = conf
         except:
             print("\n=== WEB-APP CONFIG NOT FOUND, INVALID, OR INCOMPLETE ===")
             if config_file_found == None:
@@ -57,10 +58,12 @@ def get_conf(request):
                 raise Exception(err_msg)
             err_msg = "Webapp config file ({}) is broken or incomplete (missing [apis] section)".format(config_file_found)
             print(err_msg)
+            log.debug(err_msg)
             raise Exception(err_msg)
         # add our GitHub client secret from a separate file (kept out of source repo)
         conf.set("apis", "github_client_secret", get_github_client_secret())
-    return _CONF_OBJ_DICT.get(app_name)
+    #import pdb; pdb.set_trace()
+    return _CONFIG_REGISTRY.get(app_name)
 
 def get_domain_banner_text(request):
     # Add an optional CSS banner to indicate a test domain, or none if

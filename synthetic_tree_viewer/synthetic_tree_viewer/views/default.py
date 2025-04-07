@@ -87,6 +87,8 @@ def contact(request):
     view_dict = get_opentree_services_method_urls(request)
     view_dict.update({
         'taxonSearchContextNames': fetch_current_TNRS_context_names(request),
+        'conf': get_conf(request),  # needed for the footer diagnostics
+        'currently_deployed_opentree_branch': get_currently_deployed_opentree_branch(request),
         })
     add_local_comments_markup(request, view_dict)
     return view_dict
@@ -204,7 +206,6 @@ def tree_view(request):
         'domain_banner_text': get_domain_banner_text(request),
         'domain_banner_hovertext': get_domain_banner_hovertext(request),
         })
-
 
     if request.params.get('parentWindowURL', None):
         plain_feedback_url = unquote_plus(request.params.get('parentWindowURL'))
