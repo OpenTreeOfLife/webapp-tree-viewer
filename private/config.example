@@ -50,11 +50,12 @@ CACHED_oti = https://opentree.myserver.org/cached
 [method_urls]
 getDraftTreeID_url = {CACHED_treemachine_domain}/v3/tree_of_life/about
 getSyntheticTree_url = {CACHED_treemachine_domain}/v3/tree_of_life/subtree
-getDraftSubtree_url = {treemachine_domain}/v3/tree_of_life/subtree
+getDraftSubtree_url = {CACHED_treemachine_domain}/v3/tree_of_life/subtree
 doTNRSForAutocomplete_url = {taxomachine_domain}/v3/tnrs/autocomplete_name
 getContextsJSON_url = {CACHED_taxomachine_domain}/v3/tnrs/contexts
 getSynthesisSourceList_url = {CACHED_treemachine_domain}/v3/tree_of_life/about
 findAllStudies_url = {CACHED_oti_domain}/v3/studies/find_studies
+# TODO: Can we use CACHED_oti_domain for this?
 singlePropertySearchForStudies_url = {oti_domain}/v3/studies/find_studies
 singlePropertySearchForTrees_url = {oti_domain}/v3/studies/find_trees
 getTaxonInfo_url = {taxomachine_domain}/v3/taxonomy/taxon_info
