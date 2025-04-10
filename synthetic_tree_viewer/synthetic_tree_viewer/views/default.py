@@ -6,7 +6,7 @@ from synthetic_tree_viewer.opentreewebapputil import (
     get_domain_banner_text,
     get_domain_banner_hovertext,
     get_currently_deployed_opentree_branch,
-    get_opentree_services_method_urls,
+    get_opentree_api_endpoints,
     latest_CrossRef_URL,
     fetch_current_TNRS_context_names,
     add_local_comments_markup,
@@ -36,7 +36,7 @@ def fetch_current_synthetic_tree_ids(request):
         import json
         import requests
 
-        method_dict = get_opentree_services_method_urls(request)
+        method_dict = get_opentree_api_endpoints(request)
         fetch_url = method_dict['getDraftTreeID_url']
         if fetch_url.startswith('//'):
             # Prepend scheme to a scheme-relative URL
@@ -84,7 +84,7 @@ def home(request):
 @view_config(route_name='contact', renderer='synthetic_tree_viewer:templates/contact.jinja2')
 @login_required
 def contact(request):
-    view_dict = get_opentree_services_method_urls(request)
+    view_dict = get_opentree_api_endpoints(request)
     view_dict.update({
         'taxonSearchContextNames': fetch_current_TNRS_context_names(request),
         'conf': get_conf(request),  # needed for the footer diagnostics
@@ -177,7 +177,7 @@ def tree_view(request):
     # provide view context for a dumb template
 
     # First, copy our boilerplate config vars (getDraftTreeID_url, etc)
-    view_dict = get_opentree_services_method_urls(request)
+    view_dict = get_opentree_api_endpoints(request)
 
     # retrieve latest synthetic-tree ID (and its 'life' node ID)
     # TODO: Refresh this periodically? or only when needed for initial destination?

@@ -6,7 +6,7 @@ from synthetic_tree_viewer.opentreewebapputil import (
     get_domain_banner_text,
     get_domain_banner_hovertext,
     get_currently_deployed_opentree_branch,
-    get_opentree_services_method_urls,
+    get_opentree_api_endpoints,
     add_local_comments_markup,
     latest_CrossRef_URL,
     fetch_current_TNRS_context_names,
@@ -43,7 +43,7 @@ ot_cleaner = Cleaner(tags=ot_markdown_tags, attributes=ot_markdown_attributes)
 
 def _minimal_about_viewdict(request):
     # First, copy our boilerplate config vars (getDraftTreeID_url, etc)
-    view_dict = get_opentree_services_method_urls(request)
+    view_dict = get_opentree_api_endpoints(request)
     add_local_comments_markup(request, view_dict)
 
     # Then add/override with these explicit key-value pairs
@@ -101,7 +101,7 @@ def fetch_current_synthesis_source_data(request):
         'accept' : 'application/json',
     }
     try:
-        method_dict = get_opentree_services_method_urls(request)
+        method_dict = get_opentree_api_endpoints(request)
 
         # fetch a list of all studies that contribute to synthesis
         fetch_url = method_dict['getSynthesisSourceList_url']

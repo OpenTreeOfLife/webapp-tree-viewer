@@ -1,6 +1,7 @@
 from pyramid.view import notfound_view_config
 from synthetic_tree_viewer.opentreewebapputil import (
     get_conf,
+    get_currently_deployed_opentree_branch,
     )
 
 

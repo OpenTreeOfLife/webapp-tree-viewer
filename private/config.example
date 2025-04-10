@@ -26,38 +26,41 @@ github_redirect_uri = YOUR_REDIRECT_URI_HERE
 # (the installation ID is in the URL of the Configure button here)
 github_app_installation_id = YOUR_APP_INSTALLATION_ID_HERE
 
-# List public-facing base URL for treemachine and taxomachine services
+# List public-facing base URL for supporting data services
 # (NOTE that these are used by both server- and client-side code)
-[domains]
-treemachine = http://opentree.myserver.org
-taxomachine = http://opentree.myserver.org
-oti = http://opentree.myserver.org
-opentree_api = http://opentree.myserver.org
-collections_api_base_url = https://devapi.opentreeoflife.org
-favorites_api_base_url = https://devapi.opentreeoflife.org
+[api_base_urls]
+default_apis = http://opentree.myDEVserver.org
+production_apis = http://opentree.myPRODUCTIONserver.org
+# We'll also need the production hostname to link to its curation tool from dev
+curation_production_webapp_url = https://tree.opentreeoflife.org/curator
+#collections_api_base_url = https://devapi.opentreeoflife.org
+#favorites_api_base_url = https://devapi.opentreeoflife.org
 # Cached versions of some APIs will speed up repeated calls (see below).
 # These use a simple web2py cache implemented in phylesystem-api
-CACHED_treemachine = https://opentree.myserver.org/cached
-CACHED_taxomachine = https://opentree.myserver.org/cached
-CACHED_oti = https://opentree.myserver.org/cached
+# N.B. This must be on the *same* host as the cached service!
+CACHED_default_apis = https://opentree.myDEVserver/cached
+CACHED_production_apis = https://opentree.myPRODUCTIONserver/cached
 
 # Building on the URLs above, complete the public-facing URL for all methods
 # (again, these should work from both server- and client-side code)
 #
 # NOTE: In our example setup, all service methods are proxied through Apache as
-# URLs within the main opentree site. So we assume that partial paths '/db/data/' 
+# URLs within the main opentree site. So we assume that partial paths '/db/data/'
 # are handled in the ProxyPass statement.
-[method_urls]
-getDraftTreeID_url = {CACHED_treemachine_domain}/v3/tree_of_life/about
-getSyntheticTree_url = {CACHED_treemachine_domain}/v3/tree_of_life/subtree
-getDraftSubtree_url = {CACHED_treemachine_domain}/v3/tree_of_life/subtree
-doTNRSForAutocomplete_url = {taxomachine_domain}/v3/tnrs/autocomplete_name
-getContextsJSON_url = {CACHED_taxomachine_domain}/v3/tnrs/contexts
-getSynthesisSourceList_url = {CACHED_treemachine_domain}/v3/tree_of_life/about
-findAllStudies_url = {CACHED_oti_domain}/v3/studies/find_studies
-# TODO: Can we use CACHED_oti_domain for this?
-singlePropertySearchForStudies_url = {oti_domain}/v3/studies/find_studies
-singlePropertySearchForTrees_url = {oti_domain}/v3/studies/find_trees
-getTaxonInfo_url = {taxomachine_domain}/v3/taxonomy/taxon_info
+[api_endpoints]
+getDraftTreeID_url = {default_apis}/v3/tree_of_life/about
+getSyntheticTree_url = {CACHED_default_apis}/v3/tree_of_life/subtree
+getDraftSubtree_url = {default_apis}/v3/tree_of_life/subtree
+doTNRSForAutocomplete_url = {default_apis}/v3/tnrs/autocomplete_name
+getContextsJSON_url = {CACHED_default_apis}/v3/tnrs/contexts
+getSynthesisSourceList_url = {CACHED_default_apis}/v3/tree_of_life/about
+findAllStudies_url = {CACHED_production_apis}/v3/studies/find_studies
+singlePropertySearchForStudies_url = {production_apis}/v3/studies/find_studies
+singlePropertySearchForTrees_url = {production_apis}/v3/studies/find_trees
+getTaxonInfo_url = {default_apis}/v3/taxonomy/taxon_info
 # Include one phylesystem-api method to download NexSON from Bibliographic References page
-API_load_study_GET_url = {opentree_api_domain}/v3/study/{STUDY_ID}
+API_load_study_GET_url = {production_apis}/v3/study/{STUDY_ID}
+
+# The synth-tree viewer GUI includes links to a curation app. For "curatorless"
+# installations, this should point to a working public curation app.
+curation_webapp_url = YOUR_CURATION_APP_URL
