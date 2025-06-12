@@ -38,8 +38,9 @@ def get_conf(request):
         # DON'T convert property names to lower-case!
         conf.optionxform = str
         test_config_paths = [
-            os.path.abspath("../private/localconfig"),  # rarely used, but takes priority
-            os.path.abspath("../private/config"),       # most common location
+            # NB - These files are for API URLs, etc. and NOT basic Pyramid config!
+            os.path.abspath("../app_localconfig"),  # rarely used, but takes priority
+            os.path.abspath("../app_config"),       # most common location
         ]
         config_file_found = None
         try:
@@ -122,7 +123,7 @@ def get_opentree_api_base_urls(request):
         These values will contain the port (when needed) and any base path like `/cached'
 
     This is mainly useful for debugging because it lets developers use local
-        instances of the service by tweaking private/conf (see private/conf.example)
+        instances of the service by tweaking app_config (see app_config.example)
     '''
     conf = get_conf(request)
     base_url_pairs = conf.items('api_base_urls')
@@ -139,7 +140,7 @@ def get_opentree_api_endpoints(request):
 
     This is useful for debugging and for adapting to different ways of
         configuring services, eg, proxied through a single domain
-        (see private/conf.example)
+        (see app_config.example)
     '''
     base_urls = get_opentree_api_base_urls(request)
 
