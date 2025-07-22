@@ -14,3 +14,4 @@ uvicorn
 prettydate
 pytz
 pyramid_retry
+setuptools>=80.9.0
