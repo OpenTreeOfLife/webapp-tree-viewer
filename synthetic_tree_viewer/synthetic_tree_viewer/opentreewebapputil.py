@@ -37,24 +37,21 @@ def get_conf(request):
         conf = ConfigParser()
         # DON'T convert property names to lower-case!
         conf.optionxform = str
-        test_config_paths = [
-            # NB - These files are for API URLs, etc. and NOT basic Pyramid config!
-            os.path.abspath("../app_localconfig"),  # rarely used, but takes priority
-            os.path.abspath("../app_config"),       # most common location
-        ]
+        # Our monilithic app-config file includes its own absolute filesystem path;
+        # use this to parse and load API endpoints, etc.
+        test_config_path = request.registry.settings.get('path_to_app_config', '')
         config_file_found = None
         try:
-            for test_path in test_config_paths:
-                if os.path.isfile(test_path):
-                    config_file_found = test_path
-                    conf.read(test_path)
-                    break;
+            if os.path.isfile(test_config_path):
+                config_file_found = test_config_path
+                conf.read(test_config_path)
+                break;
             assert 'apis' in conf.sections()
             _CONFIG_REGISTRY[app_name] = conf
         except:
             print("\n=== WEB-APP CONFIG NOT FOUND, INVALID, OR INCOMPLETE ===")
             if config_file_found == None:
-                err_msg = "Webapp config not found! Expecting it in one of these locations:\n  {}".format(test_config_paths)
+                err_msg = "Webapp config not found! Expecting it in this location:\n  {}".format(test_config_path)
                 print(err_msg)
                 raise Exception(err_msg)
             err_msg = "Webapp config file ({}) is broken or incomplete (missing [apis] section)".format(config_file_found)
