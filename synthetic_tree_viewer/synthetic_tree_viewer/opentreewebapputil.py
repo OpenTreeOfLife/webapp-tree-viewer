@@ -29,7 +29,7 @@ def get_github_client_secret():
 
 def get_conf(request):
     # get app-specific settings (e.g. API URLs)
-    global _CONF_REGISTRY
+    global _CONFIG_REGISTRY
 
     app_name = request.registry.package_name
     if _CONFIG_REGISTRY.get(app_name) is None:
@@ -63,7 +63,6 @@ def get_conf(request):
             raise Exception(err_msg)
         # add our GitHub client secret from a separate file (kept out of source repo)
         conf.set("apis", "github_client_secret", get_github_client_secret())
-    #import pdb; pdb.set_trace()
     return _CONFIG_REGISTRY.get(app_name)
 
 def get_domain_banner_text(request):
