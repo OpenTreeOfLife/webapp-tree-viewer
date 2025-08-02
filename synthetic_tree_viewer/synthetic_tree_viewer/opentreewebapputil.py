@@ -37,13 +37,14 @@ def get_conf(request):
         conf = ConfigParser()
         # DON'T convert property names to lower-case!
         conf.optionxform = str
-        # Our monilithic app-config file includes its own absolute filesystem path;
+        # Our monolithic app-config file includes its own absolute filesystem path;
         # use this to parse and load API endpoints, etc.
         test_config_path = request.registry.settings.get('path_to_app_config', '')
         config_file_found = None
         more_info = None
         try:
-            more_info = os.path.isfile(test_config_path)
+            path_exists = os.path.exists(test_config_path)
+            path_is_file = os.path.isfile(test_config_path)
             if os.path.isfile(test_config_path):
                 config_file_found = test_config_path
                 conf.read(test_config_path)
@@ -53,10 +54,16 @@ def get_conf(request):
             print("\n=== WEB-APP CONFIG NOT FOUND, INVALID, OR INCOMPLETE ===")
             if config_file_found is None:
                 import pwd
-                err_msg = "Webapp config not found (as user {})! Expecting it in this location:\n  {}\n  more_info={}".format(
+                err_msg = "Webapp config not found (as user {})! Expecting it in this location:\n  {}"
+                err_msg += "\n  path_exists={}"
+                err_msg += "\n  path_is_file={}"
+                err_msg += "\n  config_file_found={}"
+                err_msg = err_msg.format(
                    pwd.getpwuid( os.geteuid() ).pw_name,
                    test_config_path,
-                   more_info
+                   path_exists,
+                   path_is_file,
+                   config_file_found,
                    )
                 print(err_msg)
                 raise Exception(err_msg)
