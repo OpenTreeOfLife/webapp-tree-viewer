@@ -43,6 +43,8 @@ def get_conf(request):
         config_file_found = None
         more_info = None
         try:
+            prior2_path_exists = os.path.exists("/home/deploy/configs")
+            prior_path_exists = os.path.exists("/home/deploy/configs/synthetic_tree_viewer")
             path_exists = os.path.exists(test_config_path)
             path_is_file = os.path.isfile(test_config_path)
             if os.path.isfile(test_config_path):
@@ -55,12 +57,16 @@ def get_conf(request):
             if config_file_found is None:
                 import pwd
                 err_msg = "Webapp config not found (as user {})! Expecting it in this location:\n  {}"
+                err_msg += "\n  prior2_path_exists={}"
+                err_msg += "\n  prior_path_exists={}"
                 err_msg += "\n  path_exists={}"
                 err_msg += "\n  path_is_file={}"
                 err_msg += "\n  config_file_found={}"
                 err_msg = err_msg.format(
                    pwd.getpwuid( os.geteuid() ).pw_name,
                    test_config_path,
+                   prior2_path_exists,
+                   prior_path_exists,
                    path_exists,
                    path_is_file,
                    config_file_found,
