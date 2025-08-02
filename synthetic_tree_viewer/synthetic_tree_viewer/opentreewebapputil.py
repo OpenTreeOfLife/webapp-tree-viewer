@@ -45,6 +45,8 @@ def get_conf(request):
         try:
             prior2_path_exists = os.path.exists("/home/deploy/configs")
             prior_path_exists = os.path.exists("/home/deploy/configs/synthetic_tree_viewer")
+            exact_path_exists = os.path.exists("/home/deploy/configs/synthetic_tree_viewer/treeview_app_config.ini")
+            exact_path_is_file = os.path.isfile("/home/deploy/configs/synthetic_tree_viewer/treeview_app_config.ini")
             path_exists = os.path.exists(test_config_path)
             path_is_file = os.path.isfile(test_config_path)
             if os.path.isfile(test_config_path):
@@ -59,6 +61,8 @@ def get_conf(request):
                 err_msg = "Webapp config not found (as user {})! Expecting it in this location:\n  {}"
                 err_msg += "\n  prior2_path_exists={}"
                 err_msg += "\n  prior_path_exists={}"
+                err_msg += "\n  exact_path_exists={}"
+                err_msg += "\n  exact_path_is_file={}"
                 err_msg += "\n  path_exists={}"
                 err_msg += "\n  path_is_file={}"
                 err_msg += "\n  config_file_found={}"
@@ -67,6 +71,8 @@ def get_conf(request):
                    test_config_path,
                    prior2_path_exists,
                    prior_path_exists,
+                   exact_path_exists,
+                   exact_path_is_file,
                    path_exists,
                    path_is_file,
                    config_file_found,
