@@ -41,7 +41,9 @@ def get_conf(request):
         # use this to parse and load API endpoints, etc.
         test_config_path = request.registry.settings.get('path_to_app_config', '')
         config_file_found = None
+        more_info = None
         try:
+            more_info = os.path.isfile(test_config_path)
             if os.path.isfile(test_config_path):
                 config_file_found = test_config_path
                 conf.read(test_config_path)
@@ -49,11 +51,12 @@ def get_conf(request):
             _CONFIG_REGISTRY[app_name] = conf
         except:
             print("\n=== WEB-APP CONFIG NOT FOUND, INVALID, OR INCOMPLETE ===")
-            if config_file_found == None:
+            if config_file_found is None:
                 import pwd
-                err_msg = "Webapp config not found (as user {})! Expecting it in this location:\n  {}".format(
+                err_msg = "Webapp config not found (as user {})! Expecting it in this location:\n  {}\n  more_info={}".format(
                    pwd.getpwuid( os.geteuid() ).pw_name,
-                   test_config_path
+                   test_config_path,
+                   more_info
                    )
                 print(err_msg)
                 raise Exception(err_msg)
