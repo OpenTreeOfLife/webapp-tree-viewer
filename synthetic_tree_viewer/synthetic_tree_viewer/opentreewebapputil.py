@@ -50,7 +50,11 @@ def get_conf(request):
         except:
             print("\n=== WEB-APP CONFIG NOT FOUND, INVALID, OR INCOMPLETE ===")
             if config_file_found == None:
-                err_msg = "Webapp config not found! Expecting it in this location:\n  {}".format(test_config_path)
+                import pwd
+                err_msg = "Webapp config not found (as user {})! Expecting it in this location:\n  {}".format(
+                   pwd.getpwuid( os.geteuid() ).pw_name,
+                   test_config_path
+                   )
                 print(err_msg)
                 raise Exception(err_msg)
             err_msg = "Webapp config file ({}) is broken or incomplete (missing [apis] section)".format(config_file_found)
