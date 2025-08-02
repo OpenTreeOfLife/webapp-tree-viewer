@@ -59,23 +59,9 @@ def get_conf(request):
             if config_file_found is None:
                 import pwd
                 err_msg = "Webapp config not found (as user {})! Expecting it in this location:\n  {}"
-                err_msg += "\n  prior2_path_exists={}"
-                err_msg += "\n  prior_path_exists={}"
-                err_msg += "\n  exact_path_exists={}"
-                err_msg += "\n  exact_path_is_file={}"
-                err_msg += "\n  path_exists={}"
-                err_msg += "\n  path_is_file={}"
-                err_msg += "\n  config_file_found={}"
                 err_msg = err_msg.format(
                    pwd.getpwuid( os.geteuid() ).pw_name,
                    test_config_path,
-                   prior2_path_exists,
-                   prior_path_exists,
-                   exact_path_exists,
-                   exact_path_is_file,
-                   path_exists,
-                   path_is_file,
-                   config_file_found,
                    )
                 print(err_msg)
                 raise Exception(err_msg)
