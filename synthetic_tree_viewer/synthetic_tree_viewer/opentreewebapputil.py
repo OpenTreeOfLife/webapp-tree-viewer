@@ -45,7 +45,6 @@ def get_conf(request):
             if os.path.isfile(test_config_path):
                 config_file_found = test_config_path
                 conf.read(test_config_path)
-                break;
             assert 'apis' in conf.sections()
             _CONFIG_REGISTRY[app_name] = conf
         except:
