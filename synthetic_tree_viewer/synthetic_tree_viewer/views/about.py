@@ -29,11 +29,11 @@ from bleach.sanitizer import Cleaner
 # whitelist.
 # N.B. HTML comments are stripped by default. Non-allowed tags will appear
 # "naked" in output, so we can identify any bad actors.
-common_version_notes_tags = [u'p', u'br', u'pre',
+common_version_notes_tags = {u'p', u'br', u'pre',
                              u'h1', u'h2', u'h3', u'h4', u'h5', u'h6',
                              u'table', u'tbody', u'tr', u'td', u'th',
-                             ]
-ot_markdown_tags = list(set( bleach.sanitizer.ALLOWED_TAGS + common_version_notes_tags))
+                             }
+ot_markdown_tags = list( bleach.sanitizer.ALLOWED_TAGS.union(common_version_notes_tags) )
 common_version_notes_attributes={u'table': [u'class'],
                                  }
 ot_markdown_attributes = bleach.sanitizer.ALLOWED_ATTRIBUTES.copy()
