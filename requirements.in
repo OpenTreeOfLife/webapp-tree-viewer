@@ -9,7 +9,7 @@ pipdeptree
 cookiecutter
 ConfigParser
 markdown
-authomatic
+git+https://github.com/authomatic/authomatic.git@master
 uvicorn
 prettydate
 pytz
