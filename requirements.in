@@ -9,8 +9,7 @@ pipdeptree
 cookiecutter
 ConfigParser
 markdown
-git+https://github.com/authomatic/authomatic.git@2f0b3a986190f9d1f623c947020ed586120ab7fc
-# avoids the next commit with problematic 'super()' calls
+git+https://github.com/authomatic/authomatic.git@master
 uvicorn
 prettydate
 pytz
