@@ -34,7 +34,8 @@ def get_conf(request):
     app_name = request.registry.package_name
     if _CONFIG_REGISTRY.get(app_name) is None:
         from configparser import ConfigParser
-        conf = ConfigParser()
+        # ignore interpolation % markers in logging formatters!
+        conf = ConfigParser(interpolation=None)
         # DON'T convert property names to lower-case!
         conf.optionxform = str
         # Our monolithic app-config file includes its own absolute filesystem path;
