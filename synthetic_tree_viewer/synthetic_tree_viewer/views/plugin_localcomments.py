@@ -760,8 +760,7 @@ def extract_safe_html_comment(comment):
     # Cook up some reasonably strong regular expressions to detect bare
     # URLs and wrap them in hyperlinks. Adapted from
     # http://stackoverflow.com/questions/1071191/detect-urls-in-a-string-and-wrap-with-a-href-tag
-    link_regex = re.compile(  r'''
-                         (?x)( # verbose identify URLs within text
+    link_regex = re.compile(  r'''(?x)( # verbose identify URLs within text
                   (http|https) # make sure we find a resource type
                            :// # ...needs to be followed by colon-slash-slash
                 (\w+[:.]?){2,} # at least two domain groups, e.g. (gnosis.)(cx)
