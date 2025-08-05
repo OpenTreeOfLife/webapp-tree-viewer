@@ -780,10 +780,10 @@ def extract_safe_html_comment(comment):
     # whitelist.
     # N.B. HTML comments are stripped by default. Non-allowed tags will appear
     # "naked" in output, so we can identify any bad actors.
-    common_feedback_tags = [u'p', u'br',
+    common_feedback_tags = {u'p', u'br',
                             u'h1', u'h2', u'h3', u'h4', u'h5', u'h6',
-                            ]
-    ot_markdown_tags = list(set( bleach.sanitizer.ALLOWED_TAGS + common_feedback_tags))
+                            }
+    ot_markdown_tags = list( bleach.sanitizer.ALLOWED_TAGS.union(common_feedback_tags) )
     ot_cleaner = Cleaner(tags=ot_markdown_tags)
 
     # and now we use all that to clean up the HTML
