@@ -118,7 +118,31 @@ def login(request):
     if (login_result and login_result.user):
         # update full user info (name, email, etc) and stash in the current session
         log.debug("TRUE login_result '%s' AND TRUE user '%s'", login_result, login_result.user)
+
+        #
+        # AND HERE we crash, apparently because a related module is reloaded,
+        # so this object fails a bare call to `super()` in recent authomatic
+        # versions. (The implied class's name will match, but not its numeric ID!)
+        ##login_result.user.update()
+        # Can we recast the variable into an instance of its doppelganger class?
+        # Do we need to do that recursively, through all members, to shake the old class IDs?
+        recaster = 'DEEP_COPY')
+        if (recaster == 'DEEP_COPY'):
+            # will the class ID be updated here?
+            from copy import deepcopy
+            login_result = login_result.deepcopy()
+        elif (recaster == 'FORCE_CLASS'):
+            # this is crude, but it *should* work for our purpose
+            # see https://authomatic.github.io/authomatic/reference/classes.html
+            login_result.__class__ = 'authomatic.core.LoginResult'
+            login_result.user.__class__ = 'authomatic.core.User'
+            login_result.error.__class__ = 'authomatic.exceptions.BaseError'
+        elif (recaster == 'COPY_CAST'):
+            # create new instances and transfer piecemeal
+            new_result = ???()
+            login_result = new_result
         login_result.user.update()
+
         log.debug("User after immediate update: %s", login_result.user.data)
         gh_user_data = login_result.user.data
         request.session['auth_user'] = {
