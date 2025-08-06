@@ -142,8 +142,8 @@ def login(request):
             import authomatic as autho
             login_result.__class__ = autho.core.LoginResult
             login_result.user.__class__ = autho.core.User
-            login_result.provider.__class__ = autho.oauth2.GitHub
-            login_result.user.provider.__class__ = autho.oauth2.GitHub
+            login_result.provider.__class__ = autho.providers.oauth2.GitHub
+            login_result.user.provider.__class__ = autho.providers.oauth2.GitHub
             #login_result.error.__class__ = autho.exceptions.BaseError
         elif (recaster == 'COPY_CAST'):
             # create new instances and transfer piecemeal
