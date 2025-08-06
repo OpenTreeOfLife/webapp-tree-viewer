@@ -126,7 +126,7 @@ def login(request):
         ##login_result.user.update()
         # Can we recast the variable into an instance of its doppelganger class?
         # Do we need to do that recursively, through all members, to shake the old class IDs?
-        recaster = 'FORCE_CLASS'
+        recaster = 'NONE'
         if (recaster == 'DEEP_COPY'):
             # will the class ID be updated here?
             from copy import deepcopy
@@ -142,8 +142,9 @@ def login(request):
             import authomatic as autho
             login_result.__class__ = autho.core.LoginResult
             login_result.user.__class__ = autho.core.User
-            login_result.provider.__class__ = autho.providers.oauth2.GitHub
+            # NB Wrong provider class is implied in the failing `super()` call in Authomatic
             login_result.user.provider.__class__ = autho.providers.oauth2.GitHub
+            login_result.provider.__class__ = autho.providers.oauth2.GitHub
             #login_result.error.__class__ = autho.exceptions.BaseError
         elif (recaster == 'COPY_CAST'):
             # create new instances and transfer piecemeal
