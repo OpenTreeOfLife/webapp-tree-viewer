@@ -126,7 +126,7 @@ def login(request):
         ##login_result.user.update()
         # Can we recast the variable into an instance of its doppelganger class?
         # Do we need to do that recursively, through all members, to shake the old class IDs?
-        recaster = 'SHALLOW_COPY'
+        recaster = 'FORCE_CLASS'
         if (recaster == 'DEEP_COPY'):
             # will the class ID be updated here?
             from copy import deepcopy
@@ -135,12 +135,13 @@ def login(request):
         elif (recaster == 'SHALLOW_COPY'):
             from copy import copy
             login_result = copy(login_result)
+            # NO, this still creates an instance of the old/incompatible class!
         elif (recaster == 'FORCE_CLASS'):
             # this is crude, but it *should* work for our purpose
             # see https://authomatic.github.io/authomatic/reference/classes.html
-            login_result.__class__ = 'authomatic.core.LoginResult'
-            login_result.user.__class__ = 'authomatic.core.User'
-            login_result.error.__class__ = 'authomatic.exceptions.BaseError'
+            login_result.__class__ = authomatic.core.LoginResult
+            login_result.user.__class__ = authomatic.core.User
+            login_result.error.__class__ = authomatic.exceptions.BaseError
         elif (recaster == 'COPY_CAST'):
             # create new instances and transfer piecemeal
             #new_result = ???()
