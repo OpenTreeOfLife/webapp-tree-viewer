@@ -139,9 +139,10 @@ def login(request):
         elif (recaster == 'FORCE_CLASS'):
             # this is crude, but it *should* work for our purpose
             # see https://authomatic.github.io/authomatic/reference/classes.html
-            login_result.__class__ = authomatic.core.LoginResult
-            login_result.user.__class__ = authomatic.core.User
-            login_result.error.__class__ = authomatic.exceptions.BaseError
+            import authomatic as autho
+            login_result.__class__ = autho.core.LoginResult
+            login_result.user.__class__ = autho.core.User
+            login_result.error.__class__ = autho.exceptions.BaseError
         elif (recaster == 'COPY_CAST'):
             # create new instances and transfer piecemeal
             #new_result = ???()
