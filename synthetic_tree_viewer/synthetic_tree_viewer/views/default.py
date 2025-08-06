@@ -126,7 +126,7 @@ def login(request):
         ##login_result.user.update()
         # Can we recast the variable into an instance of its doppelganger class?
         # Do we need to do that recursively, through all members, to shake the old class IDs?
-        recaster = 'DEEP_COPY')
+        recaster = 'DEEP_COPY'
         if (recaster == 'DEEP_COPY'):
             # will the class ID be updated here?
             from copy import deepcopy
