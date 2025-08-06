@@ -139,8 +139,9 @@ def login(request):
             login_result.error.__class__ = 'authomatic.exceptions.BaseError'
         elif (recaster == 'COPY_CAST'):
             # create new instances and transfer piecemeal
-            new_result = ???()
-            login_result = new_result
+            #new_result = ???()
+            #login_result = new_result
+            pass
         login_result.user.update()
 
         log.debug("User after immediate update: %s", login_result.user.data)
