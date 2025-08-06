@@ -130,7 +130,7 @@ def login(request):
         if (recaster == 'DEEP_COPY'):
             # will the class ID be updated here?
             from copy import deepcopy
-            login_result = login_result.deepcopy()
+            login_result = deepcopy(login_result)
         elif (recaster == 'FORCE_CLASS'):
             # this is crude, but it *should* work for our purpose
             # see https://authomatic.github.io/authomatic/reference/classes.html
