@@ -15,6 +15,8 @@ def includeme(config):
     config.add_route('contact', '/contact')
     # add explicit route for OAuth redirect_uri
     config.add_route('oauth_login', '/opentree/user/login')
+    # add route for our minimalist taxonomy browser page
+    config.add_route('taxonomy_browser', '/taxonomy/browse')
 
     # load local comments via AJAX
     config.add_route('local_comments', '/opentree/plugin_localcomments')

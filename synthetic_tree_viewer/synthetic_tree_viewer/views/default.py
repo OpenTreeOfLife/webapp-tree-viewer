@@ -93,6 +93,18 @@ def contact(request):
     add_local_comments_markup(request, view_dict)
     return view_dict
 
+@view_config(route_name='taxonomy_browser', renderer='synthetic_tree_viewer:templates/taxobrowse.jinja2')
+@login_required
+def taxobrowse(request):
+    view_dict = get_opentree_api_endpoints(request)
+    view_dict.update({
+        'taxonSearchContextNames': fetch_current_TNRS_context_names(request),
+        'conf': get_conf(request),  # needed for the footer diagnostics
+        'currently_deployed_opentree_branch': get_currently_deployed_opentree_branch(request),
+        })
+    #add_local_comments_markup(request, view_dict)
+    return view_dict
+
 @view_config(route_name='oauth_login')  # TODO: does this need a template/renderer?
 def login(request):
     # we'll redirect to any specified destination (or the Home page)

@@ -10,6 +10,7 @@ Allow: /contact
 Allow: /curator/study/view/
 Disallow: /curator/study/edit/
 Disallow: /curator/study/create/
+Disallow: /taxonomy/browse
 # Block access to APIs, if found here
 Disallow: /phylesystem/
 Disallow: /treemachine/
