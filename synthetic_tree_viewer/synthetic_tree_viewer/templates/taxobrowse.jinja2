@@ -450,13 +450,12 @@ var populate_by_id = function(ott_int) {
     var args = {"ott_id": ott_int, 
                 'include_children': true, 
                 'include_lineage': true};
-
+    error_id_container.textContent = "ID found, loading taxon info...";
+    error_id_container.hidden = false;
     xmlhttp.onreadystatechange = function() {
         if (this.readyState == 4) {
             if (this.status == 200) {
                 response_obj = JSON.parse(this.responseText);
-                error_id_container.textContent = "Match found, loading taxon info...";
-                error_id_container.hidden = false;
                 by_id_response_cb(response_obj);
             } else {
                 var errmsg = "Call to API to fetch taxon info for " + ott_int + "failed";
