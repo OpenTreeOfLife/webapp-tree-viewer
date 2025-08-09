@@ -82,9 +82,9 @@
   </style>
 </head>
 <body id="spinner-container" class="spinner" onload="postload()">
-    <form id="searchform" action="browse">
+    <form id="searchform" action="browse" onsubmit="return set_name_or_id();">
         <p align="right">
-            <input type="text" name="name" placeholder="name or id"/>
+            <input id="name_or_id_field" type="text" name="name" placeholder="name or id"/>
         </p>
     </form>
   <span class="error" id="errorpanel"></span>
@@ -510,6 +510,18 @@ var postload = function() {
     }
 };
 
+var set_name_or_id = function() {
+    //var the_form = document.getElementById("searchform");
+    var name_or_id_field = document.getElementById("name_or_id_field");
+    if (isNaN(name_or_id_field.value)) {
+        // it's a name! submit the form as-is
+        return true;
+    } else {
+        // it's a plausible ID, tweak field name and submit form
+        name_or_id_field.setAttribute("name", "id");
+    }
+    return true;
+}
 
 /* a basic spinner to show during load+parse */
 var spinner_el = document.getElementById("spinner-container");
