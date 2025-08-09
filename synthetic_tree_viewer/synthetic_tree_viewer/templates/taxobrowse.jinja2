@@ -450,8 +450,6 @@ var populate_by_id = function(ott_int) {
     var args = {"ott_id": ott_int, 
                 'include_children': true, 
                 'include_lineage': true};
-    error_id_container.textContent = "ID found, loading taxon info...";
-    error_id_container.hidden = false;
     xmlhttp.onreadystatechange = function() {
         if (this.readyState == 4) {
             if (this.status == 200) {
@@ -489,6 +487,8 @@ var postload = function() {
         if (isNaN(ott_int) || ott_int < 1) {
             alert("Expected id param to be a positive integer found \"" + id_param + "\"");
         } else {
+            error_id_container.textContent = "ID found, loading taxon info...";
+            error_id_container.hidden = false;
             populate_by_id(ott_int);
         }
     } else {
