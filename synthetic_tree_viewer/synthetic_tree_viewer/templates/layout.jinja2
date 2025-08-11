@@ -565,7 +565,7 @@
                    <dd><strong style="color: #888;">{{  currently_deployed_opentree_branch }}
                    </strong></dd>
           {% if conf: %}
-            {% for sec in conf.keys(): %}
+            {% for sec in ('apis', 'api_base_urls', 'api_endpoints'): %}
               {% if sec != 'DEFAULT': %}
                <dt>{{ sec }}</dt>
                  {% for name, value in conf[sec].items(): %}
