@@ -126,14 +126,13 @@
 
 <script type="text/javascript">
 
-var tree_server = "https://tree.opentreeoflife.org";
-var api_server = "https://api.opentreeoflife.org";
+var tree_server = {{ taxo_browser_tree_server }};
+var api_server = {{ taxo_browser_api_server }};
 var taxon_info_url = api_server + "/v3/taxonomy/taxon_info";
 var name_match_url = api_server + "/v3/tnrs/match_names";
-var about_taxon_url = tree_server + "/about/taxonomy-version/ott3.7";
+var about_taxon_url = tree_server + "/about/taxonomy-version/{{ taxo_browser_ott_version }}";
 var page_route = "browse";
-var amendments_repo_number = "1";
-var amends_url_pref = "https://github.com/OpenTreeOfLife/amendments-" + amendments_repo_number + "/blob/master/amendments/";
+var amends_url_pref = "https://github.com/OpenTreeOfLife/amendments-{{ taxo_browser_amendment_repo_number }}/blob/master/amendments/";
 
 var get_link_for_taxsrc = function (taxsrc) {
     var tsurl;
