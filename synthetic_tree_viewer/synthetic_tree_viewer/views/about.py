@@ -66,6 +66,14 @@ def _minimal_about_viewdict(request):
 
     return view_dict
 
+@view_config(route_name='favicon')
+def favicon_view(request):
+    import os
+    from pyramid.response import Response
+    favicon_path = './synthetic_tree_viewer/static/favicon.ico'
+    with open(favicon_path, 'rb') as f:
+        content = f.read()
+    return Response(body=content, content_type='image/x-icon')
 
 @view_config(route_name='about',
              renderer='synthetic_tree_viewer:templates/about/open_tree_of_life.jinja2')
