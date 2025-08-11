@@ -535,7 +535,7 @@ from applications.opentree.modules.opentreewebapputil import get_user_login, get
 
             {{ # format non-sensitive config data for display
                conf = get_conf(request)
-               for sec in conf.sections(): }}
+               for sec in ('apis', 'api_base_urls', 'api_endpoints'): }}
                <dt>{{= sec }}</dt>
                    {{ for itm in conf.items(sec): }}
                    <dd><strong class="setting-name">{{= itm[0] }}</strong>: {{= itm[1] }}</dd>
