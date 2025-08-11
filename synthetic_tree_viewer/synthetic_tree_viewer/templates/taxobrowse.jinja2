@@ -126,8 +126,8 @@
 
 <script type="text/javascript">
 
-var tree_server = {{ taxo_browser_tree_server }};
-var api_server = {{ taxo_browser_api_server }};
+var tree_server = "{{ taxo_browser_tree_server }}";
+var api_server = "{{ taxo_browser_api_server }}";
 var taxon_info_url = api_server + "/v3/taxonomy/taxon_info";
 var name_match_url = api_server + "/v3/tnrs/match_names";
 var about_taxon_url = tree_server + "/about/taxonomy-version/{{ taxo_browser_ott_version }}";
