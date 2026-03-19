@@ -10,17 +10,22 @@ with open(os.path.join(here, "CHANGES.txt")) as f:
 
 requires = [
     "authomatic",
+    "bleach",
+    "markdown",
     "plaster_pastedeploy",
     "pyramid",
-    "pyramid_jinja2",
     "pyramid_debugtoolbar",
+    "pyramid_jinja2",
+    "pyramid_retry",
+    "pytz",
+    "requests",
     "waitress",
 ]
 
 tests_require = [
-    "WebTest",
     "pytest",
     "pytest-cov",
+    "WebTest",
 ]
 
 setup(
