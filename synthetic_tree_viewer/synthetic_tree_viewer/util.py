@@ -162,26 +162,9 @@ def get_opentree_api_base_urls(request):
 
 def get_opentree_api_endpoints(request):
     """
-    Reads the local configuration to build on base URLs and return a dictionary
-         with keys for all API endpoints (method URLs) combining base URLs
-         and partial paths for each method
-
-    This is useful for debugging and for adapting to different ways of
-        configuring services, eg, proxied through a single domain
-        (see app_config.example)
+    Returns the dict created by create_api_endpoints
     """
-    base_urls = get_opentree_api_base_urls(request)
-
-    conf = get_conf(request)
-    url_pairs = conf.items("api_endpoints")
-    api_endpoints = base_urls.copy()
-    for mname, murl in url_pairs:
-        # replace any domain tokens, eg, 'default_apis'
-        for dname, durl in base_urls.items():
-            murl = murl.replace("{%s}" % dname, durl)
-        api_endpoints[mname] = murl
-
-    return api_endpoints
+    return request.registry.settings["api_endpoints"]
 
 
 def add_local_comments_markup(request, view_dict={}):

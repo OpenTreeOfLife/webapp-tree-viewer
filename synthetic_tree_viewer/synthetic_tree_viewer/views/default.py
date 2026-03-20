@@ -16,6 +16,11 @@ from synthetic_tree_viewer.util import (
 from pyramid.httpexceptions import HTTPNotFound, HTTPSeeOther
 from pyramid_retry import RetryableException
 
+try:
+    from urllib import unquote_plus
+except ImportError:
+    from urllib.parse import unquote_plus
+
 import logging
 
 log = logging.getLogger(__name__)
@@ -247,10 +252,6 @@ def login(request):
 def tree_view(request):
     log.debug(f"... entering tree_view matchdict = {dict(request.matchdict)}")
     log.debug(f"       request.registry.settings = {dict(request.registry.settings)}")
-    try:
-        from urllib import unquote_plus
-    except ImportError:
-        from urllib.parse import unquote_plus
 
     # node_id = request.matchdict['node_id']
     # examine the full path to customize this view
@@ -261,6 +262,7 @@ def tree_view(request):
 
     # First, copy our boilerplate config vars (getDraftTreeID_url, etc)
     view_dict = get_opentree_api_endpoints(request)
+    log.debug(f"       view_dict = {view_dict}")
 
     # retrieve latest synthetic-tree ID (and its 'life' node ID)
     # TODO: Refresh this periodically? or only when needed for initial destination?
