@@ -224,22 +224,17 @@ def login(request):
     route_name="tree_view", renderer="synthetic_tree_viewer:templates/tree_view.jinja2"
 )
 def tree_view(request):
-    log.debug(f"... entering tree_view matchdict = {dict(request.matchdict)}")
-    log.debug(f"       request.registry.settings = {dict(request.registry.settings)}")
-
-    # examine the full path to customize this view
     full_path = request.matchdict["full_path"]
     path_parts = full_path.split("/")
-
-    # First, copy our boilerplate config vars (getDraftTreeID_url, etc)
     view_dict = get_opentree_api_endpoints(request)
 
     # retrieve latest synthetic-tree ID (and its 'life' node ID)
     # TODO: Refresh this periodically? or only when needed for initial destination?
-    latestSyntheticTreeVersion, startingNodeID = fetch_current_synthetic_tree_ids(
-        request
-    )
-
+    try:
+        tree_version, startingNodeID = fetch_current_synthetic_tree_ids(request)
+    except Exception as e:
+        # throw 403 or 500 or just leave it
+        tree_version, startingNodeID = "ERROR", str(e)
     # Then add/override with these explicit key-value pairs
     view_dict.update(
         {
@@ -259,7 +254,7 @@ def tree_view(request):
             "taxonSearchContextNames": fetch_current_TNRS_context_names(request),
             "nudgingToLatestSyntheticTree": False,
             "forcedByURL": False,
-            "draftTreeName": latestSyntheticTreeVersion,
+            "draftTreeName": tree_version,
             "startingNodeID": startingNodeID,
             "incomingDomSource": "none",
             "showLegendOnLoad": request.params.get("show-legend") or False,
@@ -306,13 +301,13 @@ def tree_view(request):
     # N.B. that if this is unspecified ('none'), the user requested a shortened
     # URL (e.g. https://tree.opentreeoflife.org/) that resolves to the latest
     # synthetic tree.
-    incomingDomSource = view_dict.get("domSource", None) or latestSyntheticTreeVersion
+    incomingDomSource = view_dict.get("domSource", None) or tree_version
     view_dict["incomingDomSource"] = incomingDomSource
     if incomingDomSource not in (
         "ottol",
-        latestSyntheticTreeVersion,
+        tree_version,
     ):
-        view_dict["domSource"] = latestSyntheticTreeVersion
+        view_dict["domSource"] = tree_version
         view_dict["nudgingToLatestSyntheticTree"] = True
         # mark this as a redirect to a different resource
         request.response.status = 303
