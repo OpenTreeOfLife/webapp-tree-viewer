@@ -13,6 +13,9 @@ from synthetic_tree_viewer.util import (
     AUTH_CONFIG,
     login_required,
 )
+from synthetic_tree_viewer import fetch_current_synthetic_tree_ids
+import json
+import requests
 from pyramid.httpexceptions import HTTPNotFound, HTTPSeeOther
 from pyramid_retry import RetryableException
 
@@ -32,35 +35,6 @@ from authomatic.adapters import WebObAdapter  # incl. Pyramid
 authomatic = Authomatic(
     AUTH_CONFIG, "random OpenTree gobbledygook used for CSRF etc.", debug=True
 )
-
-
-def fetch_current_synthetic_tree_ids(request):
-    # return the latest synthetic-tree ID (and its 'life' node ID)
-    try:
-        # fetch the latest IDs as JSON from remote site
-        import json
-        import requests
-
-        method_dict = get_opentree_api_endpoints(request)
-        fetch_url = method_dict["getDraftTreeID_url"]
-        if fetch_url.startswith("//"):
-            # Prepend scheme to a scheme-relative URL
-            fetch_url = "https:%s" % fetch_url
-
-        fetch_args = {}
-        # this needs to be a POST (pass fetch_args or ''); if GET, it just describes the API
-        ids_json = requests.post(
-            url=fetch_url,
-            data=json.dumps(fetch_args),
-            headers={"Content-Type": "application/json"},
-        ).json()
-        draftTreeName = str(ids_json["synth_id"])
-        startNodeID = str(ids_json["root"]["node_id"])
-        return draftTreeName, startNodeID
-
-    except Exception as e:
-        # throw 403 or 500 or just leave it
-        return "ERROR", str(e)
 
 
 # Disablng PhyloPic features for now...
@@ -253,16 +227,12 @@ def tree_view(request):
     log.debug(f"... entering tree_view matchdict = {dict(request.matchdict)}")
     log.debug(f"       request.registry.settings = {dict(request.registry.settings)}")
 
-    # node_id = request.matchdict['node_id']
     # examine the full path to customize this view
     full_path = request.matchdict["full_path"]
     path_parts = full_path.split("/")
 
-    # provide view context for a dumb template
-
     # First, copy our boilerplate config vars (getDraftTreeID_url, etc)
     view_dict = get_opentree_api_endpoints(request)
-    log.debug(f"       view_dict = {view_dict}")
 
     # retrieve latest synthetic-tree ID (and its 'life' node ID)
     # TODO: Refresh this periodically? or only when needed for initial destination?

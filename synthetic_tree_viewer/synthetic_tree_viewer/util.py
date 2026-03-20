@@ -244,8 +244,6 @@ def fetch_current_TNRS_context_names(request):
             # allow for eventual removal or renaming of expected groups
             if gname in contextnames_json:
                 context_names += [n for n in contextnames_json[gname]]
-
-        # draftTreeName = str(ids_json['draftTreeName']).encode('utf-8')
         return context_names
 
     except Exception as e:

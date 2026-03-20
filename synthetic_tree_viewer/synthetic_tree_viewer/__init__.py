@@ -4,6 +4,8 @@ from pyramid.config import Configurator
 # see <https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/sessions.html#using-the-default-session-factory>
 from pyramid.session import SignedCookieSessionFactory
 import logging
+from .fetch_tree_info import fetch_current_synthetic_tree_ids
+
 
 log = logging.getLogger(__name__)
 
