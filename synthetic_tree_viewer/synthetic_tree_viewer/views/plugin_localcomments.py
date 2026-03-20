@@ -17,7 +17,7 @@ from bleach.sanitizer import Cleaner
 import pytz  # explicit time-zone support
 from datetime import datetime
 import json
-import synthetic_tree_viewer.opentreewebapputil
+import synthetic_tree_viewer.util
 
 from synthetic_tree_viewer.opentreewebapputil import (
     fetch_github_app_auth_token,

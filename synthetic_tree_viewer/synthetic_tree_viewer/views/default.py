@@ -1,5 +1,5 @@
 from pyramid.view import view_config
-from synthetic_tree_viewer.opentreewebapputil import (
+from synthetic_tree_viewer.util import (
     get_user_display_name,
     get_auth_user,
     get_conf,

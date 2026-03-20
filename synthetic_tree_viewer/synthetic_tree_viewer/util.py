@@ -1,4 +1,3 @@
-# adapted from web2py (applications.opentree.modules.opentreewebapputil)
 import os
 import re
 import configparser
@@ -72,12 +71,8 @@ def get_conf(request):
             if config_file_found is None:
                 import pwd
 
-                err_msg = "Webapp config not found (as user {})! Expecting it in this location:\n  {}"
-                err_msg = err_msg.format(
-                    pwd.getpwuid(os.geteuid()).pw_name,
-                    test_config_path,
-                )
-                print(err_msg)
+                pw_name = pwd.getpwuid(os.geteuid()).pw_name
+                err_msg = f"Webapp config not found (as user {pw_name})! Expecting it in this location:\n  {test_config_path}"
                 raise Exception(err_msg)
             err_msg = "Webapp config file ({}) is broken or incomplete (missing [apis] section)".format(
                 config_file_found
