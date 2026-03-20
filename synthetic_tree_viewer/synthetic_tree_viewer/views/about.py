@@ -236,7 +236,7 @@ def fetch_current_synthesis_source_data(request):
 
     except Exception as e:
         # throw 403 or 500 or just leave it
-        return ("ERROR", e)
+        return "ERROR", e
 
 
 @view_config(
@@ -436,7 +436,7 @@ def progress(request):
         # print( date, (synth.get(date, None) and "true" or "false") )
         has_synthesis_release = synth.get(date, None) and True or False
         synth_version_released_today = (
-            (has_synthesis_release) and synth.get(date).get("version") or str("")
+            has_synthesis_release and synth.get(date).get("version") or str("")
         )
         date_has_taxonomy = ott_new_version_info and True or False
         date_has_phylesystem = phylesystem.get(date, None) and True or False

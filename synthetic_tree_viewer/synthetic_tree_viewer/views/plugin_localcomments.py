@@ -55,15 +55,15 @@ def SUL(*a, **b):
     return UL(*[u for u in a if u], **b)
 
 
-def show_type_icon(type):
+def show_type_icon(in_type):
     iconClass = "icon-comment"
-    if type == "Error in phylogeny":
+    if in_type == "Error in phylogeny":
         iconClass = "icon-move"
-    elif type == "Bug report":
+    elif in_type == "Bug report":
         iconClass = "icon-warning-sign"
-    elif type == "Feature request":
+    elif in_type == "Feature request":
         iconClass = "icon-wrench"
-    elif type == "Reply or general":
+    elif in_type == "Reply or general":
         iconClass = "icon-comment"
     icon_markup = '<i class="{}"></i>'.format(iconClass)
     return icon_markup
@@ -258,7 +258,7 @@ def index(request):
                 issue_node
                 and SUL(
                     *[node(comment) for comment in child_comments],
-                    _style=("" if child_comments else "display: none;")
+                    _style=("" if child_comments else "display: none;"),
                 )
                 or "",
                 issue_node
@@ -581,14 +581,11 @@ def update_github_headers(request):
 
 def add_or_update_issue(msg_data, issue_id=None):
     # WATCH for accidental creation of bogus labels!
+    url = f"{GH_BASE_URL}/repos/OpenTreeOfLife/feedback/issues"
     if issue_id:
         # edit an existing issue via the GitHub API
-        url = "{0}/repos/OpenTreeOfLife/feedback/issues/{1}".format(GH_BASE_URL)
-        resp = requests.patch(url, headers=GH_POST_HEADERS, data=json.dumps(msg_data))
-    else:
-        # create a new issue
-        url = "{0}/repos/OpenTreeOfLife/feedback/issues".format(GH_BASE_URL)
-        resp = requests.post(url, headers=GH_POST_HEADERS, data=json.dumps(msg_data))
+        url = url + f"/{issue_id}"
+    resp = requests.patch(url, headers=GH_POST_HEADERS, data=json.dumps(msg_data))
     try:
         new_msg = resp.json()
     except:

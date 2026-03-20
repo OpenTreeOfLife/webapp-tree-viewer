@@ -51,11 +51,11 @@ def fetch_current_synthetic_tree_ids(request):
         ).json()
         draftTreeName = str(ids_json["synth_id"])
         startNodeID = str(ids_json["root"]["node_id"])
-        return (draftTreeName, startNodeID)
+        return draftTreeName, startNodeID
 
     except Exception as e:
         # throw 403 or 500 or just leave it
-        return ("ERROR", str(e))
+        return "ERROR", str(e)
 
 
 # Disablng PhyloPic features for now...

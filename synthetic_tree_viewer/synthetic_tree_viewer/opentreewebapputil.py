@@ -270,7 +270,7 @@ def fetch_current_TNRS_context_names(request):
 
     except Exception as e:
         # throw 403 or 500 or just leave it
-        return ("ERROR", e.message)
+        return "ERROR", e.message
 
 
 def unique_ordered_list(seq):
@@ -445,38 +445,38 @@ import datetime
 def pretty_date(d):
     now = datetime.datetime.now(datetime.timezone.utc)
     diff = now - d
-    s = diff.seconds
     days_in_a_year = 365  # close enough!
     days_in_a_month = 30  # close enough!
-    days_in_a_week = 7  # close enough!
-    if diff.days > (days_in_a_year * 2):
-        how_many_years = int(diff.days / days_in_a_year)
-        return "{} years ago".format(how_many_years)
-    elif diff.days > days_in_a_year:
-        return "1 year ago"
-    elif diff.days > (days_in_a_month * 2):
-        how_many_months = int(diff.days / days_in_a_month)
-        return "{} months ago".format(how_many_months)
-    elif diff.days > days_in_a_month:
-        return "1 month ago"
-    elif diff.days > (days_in_a_week * 2):
-        how_many_weeks = int(diff.days / days_in_a_week)
-        return "{} weeks ago".format(how_many_weeks)
-    elif diff.days > days_in_a_week:
-        return "1 week ago"
-    elif diff.days == 1:
+    days_in_a_week = 7
+    if diff.days > days_in_a_week:
+        if diff.days > (days_in_a_year * 2):
+            how_many_years = int(diff.days / days_in_a_year)
+            return f"{how_many_years} years ago"
+        elif diff.days > days_in_a_year:
+            return "1 year ago"
+        elif diff.days > (days_in_a_month * 2):
+            how_many_months = int(diff.days / days_in_a_month)
+            return f"{how_many_months} months ago"
+        elif diff.days > days_in_a_month:
+            return "1 month ago"
+        elif diff.days > (days_in_a_week * 2):
+            how_many_weeks = int(diff.days / days_in_a_week)
+            return f"{how_many_weeks} weeks ago"
+        else:
+            return "1 week ago"
+    if diff.days == 1:
         return "1 day ago"
-    elif diff.days > 1:
-        return "{} days ago".format(diff.days)
-    elif s <= 1:
+    if diff.days > 1:
+        return f"{diff.days} days ago"
+    secs = diff.seconds
+    if secs <= 1:
         return "just now"
-    elif s < 60:
-        return "{} seconds ago".format(s)
-    elif s < 120:
+    if secs < 60:
+        return f"{secs} seconds ago"
+    if secs < 120:
         return "1 minute ago"
-    elif s < 3600:
-        return "{} minutes ago".format(s / 60)
-    elif s < 7200:
+    if secs < 3600:
+        return f"{secs / 60} minutes ago"
+    if secs < 7200:
         return "1 hour ago"
-    else:
-        return "{} hours ago".format(round(s / 3600))
+    return f"{round(secs / 3600)} hours ago"
