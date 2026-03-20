@@ -17,6 +17,7 @@ requires = [
     "pyramid_debugtoolbar",
     "pyramid_jinja2",
     "pyramid_retry",
+    "python_jwt",
     "pytz",
     "requests",
     "waitress",

@@ -21,5 +21,7 @@ def main(global_config, **settings):
         config.include("pyramid_retry")
         config.include(".routes")
         config.scan()
+        rset = config.registry.settings
+        # rset["path_to_app_config_sp"] = rset["path_to_app_config"].split()
     log.debug("Configured. Calling make_wsgi_app...")
     return config.make_wsgi_app()
