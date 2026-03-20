@@ -245,6 +245,8 @@ def login(request):
     route_name="tree_view", renderer="synthetic_tree_viewer:templates/tree_view.jinja2"
 )
 def tree_view(request):
+    log.debug(f"... entering tree_view matchdict = {dict(request.matchdict)}")
+    log.debug(f"       request.registry.settings = {dict(request.registry.settings)}")
     try:
         from urllib import unquote_plus
     except ImportError:
