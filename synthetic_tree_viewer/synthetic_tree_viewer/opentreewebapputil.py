@@ -9,6 +9,8 @@ from pyramid.httpexceptions import (
     HTTPNotFound,
     HTTPSeeOther,
 )
+import datetime
+
 import logging
 
 log = logging.getLogger(__name__)
@@ -399,11 +401,11 @@ def fetch_github_app_auth_token(request):
         payload, private_key, "RS256", datetime.timedelta(minutes=5)
     )
     # use this JWT to request an auth token for the current GitHub app (bot)
+    at_url = (
+        f"https://api.github.com/app/installations/{app_installation_id}/access_tokens"
+    )
     resp = requests.post(
-        (
-            "https://api.github.com/app/installations/%s/access_tokens"
-            % app_installation_id
-        ),
+        at_url,
         headers={
             "Authorization": ("Bearer %s" % app_jwt),
             "Accept": "application/vnd.github.machine-man-preview+json",
@@ -411,10 +413,9 @@ def fetch_github_app_auth_token(request):
     )
     resp_json = resp.json()
     try:
-        new_token = resp_json.get("token")
+        return resp_json.get("token")
     except:
         raise Exception("Installation token not found in JSON response!")
-    return new_token
 
 
 def log_request_payloads(request):
@@ -439,7 +440,6 @@ def log_request_payloads(request):
 #
 # NB - This assumes an un-adjusted UTC date (ie,
 # disregard locale and daylight savings)
-import datetime
 
 
 def pretty_date(d):
