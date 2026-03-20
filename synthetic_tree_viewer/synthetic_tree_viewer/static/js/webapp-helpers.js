@@ -68,7 +68,7 @@ function latestCrossRefURL( url ) {
      * N.B. This duplicates a function with same name in curator/static/js/curation-helpers.js,
      * so changes need to be made in both places
      */
-    var latest = url.replace('http://dx.doi.org/', 'https://doi.org/');
+    var latest = url.replace('https://dx.doi.org/', 'https://doi.org/');
     return latest;
 }
 
@@ -190,5 +190,5 @@ function DOItoURL( doi ) {
     }
     // This is a candidate; try to convert it to URL form
     var bareDOI = $.trim( possibleDOIs[0] );
-    return ('http://dx.doi.org/'+ bareDOI);
+    return ('https://dx.doi.org/'+ bareDOI);
 }

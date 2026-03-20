@@ -990,47 +990,47 @@ function showObjectProperties( objInfo, options ) {
                                 break;
 
                             case 'NCBI':
-                                displayVal = '<a href="http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id='+ sourceInfo.taxSourceId +'" '
+                                displayVal = '<a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id='+ sourceInfo.taxSourceId +'" '
                                               + 'title="NCBI Taxonomy" target="_blank">NCBI: '+ sourceInfo.taxSourceId +'</a>';
                                 break;
 
                             case 'GBIF':
-                                displayVal = '<a href="http://www.gbif.org/species/'+ sourceInfo.taxSourceId +'/" '
+                                displayVal = '<a href="https://www.gbif.org/species/'+ sourceInfo.taxSourceId +'/" '
                                               + 'title="GBIF Backbone Taxonomy" target="_blank">GBIF: '+ sourceInfo.taxSourceId +'</a>';
                                 break;
 
                             case 'H2007':
-                                displayVal = '<a href="http://dx.doi.org/10.6084/m9.figshare.915439#'+ sourceInfo.taxSourceId +'" '
+                                displayVal = '<a href="https://dx.doi.org/10.6084/m9.figshare.915439#'+ sourceInfo.taxSourceId +'" '
                                               + 'title="Hibbett 2007 updated" target="_blank">Hibbett et al. 2007 updated: '+ sourceInfo.taxSourceId +'</a>';
                                 break;
 
                             case 'IF':
-                                displayVal = '<a href="http://www.indexfungorum.org/names/NamesRecord.asp?RecordID='+ sourceInfo.taxSourceId +'" '
+                                displayVal = '<a href="https://www.indexfungorum.org/names/NamesRecord.asp?RecordID='+ sourceInfo.taxSourceId +'" '
                                               + 'title="Index Fungorum" target="_blank">Index Fungorum: '+ sourceInfo.taxSourceId +'</a>';
                                 break;
 
                             case 'IRMNG':
-                                displayVal = '<a href="http://www.irmng.org/aphia.php?p=taxdetails&id='+ sourceInfo.taxSourceId +'" '
+                                displayVal = '<a href="https://www.irmng.org/aphia.php?p=taxdetails&id='+ sourceInfo.taxSourceId +'" '
                                               + 'title="Interim Register of Marine and Nonmarine Genera" target="_blank">IRMNG: '+ sourceInfo.taxSourceId +'</a>';
                                 break;
 
                             case 'WORMS':
-                                displayVal = '<a href="http://www.marinespecies.org/aphia.php?p=taxdetails&id='+ sourceInfo.taxSourceId +'" '
+                                displayVal = '<a href="https://www.marinespecies.org/aphia.php?p=taxdetails&id='+ sourceInfo.taxSourceId +'" '
                                               + 'title="World Registry of Marine Species" target="_blank">WoRMS: '+ sourceInfo.taxSourceId +'</a>';
                                 break;
 
                             case 'MB':
-                                displayVal = '<a href="http://www.mycobank.org/MB/'+ sourceInfo.taxSourceId +'/" '
+                                displayVal = '<a href="https://www.mycobank.org/MB/'+ sourceInfo.taxSourceId +'/" '
                                               + 'title="Mycobank" target="_blank">Mycobank: '+ sourceInfo.taxSourceId +'</a>';
                                 break;
 
                             case 'SILVA':
-                                displayVal = '<a href="http://www.arb-silva.de/browser/ssu/silva/'+ sourceInfo.taxSourceId +'" '
+                                displayVal = '<a href="https://www.arb-silva.de/browser/ssu/silva/'+ sourceInfo.taxSourceId +'" '
                                               + 'title="SILVA Taxonomy" target="_blank">SILVA: '+ sourceInfo.taxSourceId +'</a>';
                                 break;
 
                             case 'STUDY713':
-                                displayVal = '<a href="http://dx.doi.org/10.1186/1471-2148-10-352#'+ sourceInfo.taxSourceId +'" '
+                                displayVal = '<a href="https://dx.doi.org/10.1186/1471-2148-10-352#'+ sourceInfo.taxSourceId +'" '
                                               + 'title="Schäferhoff et al. 2010" target="_blank">Schäferhoff et al. 2010: '+ sourceInfo.taxSourceId +'</a>';
                                 break;
 
@@ -1338,9 +1338,9 @@ function showObjectProperties( objInfo, options ) {
             // (prefer '+' to '%20', but carefully encode other characters)
             var urlSafeDisplayName = encodeURIComponent(displayName).replace(/%20/g,'+');
             $details.after('<ul class="external-links">' 
-              + '<li><a target="_blank" href="http://eol.org/search?q='+ urlSafeDisplayName +'" id="link-to-EOL">'
+              + '<li><a target="_blank" href="https://eol.org/search?q='+ urlSafeDisplayName +'" id="link-to-EOL">'
               +    'Search EOL for \''+ displayName +'\'</a></li>'
-              + '<li><a target="onezoom" href="http://www.onezoom.org/life.html/@='+ itsTaxon.ott_id +'" id="link-to-OneZoom">'
+              + '<li><a target="onezoom" href="https://www.onezoom.org/life.html/@='+ itsTaxon.ott_id +'" id="link-to-OneZoom">'
               +    'Browse '+ displayName +' in OneZoom</a></li>'
               + '</ul>');
         }

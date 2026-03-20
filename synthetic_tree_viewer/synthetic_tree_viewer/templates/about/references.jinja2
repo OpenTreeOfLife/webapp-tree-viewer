@@ -79,10 +79,10 @@ div.contributing-studies div.links .tree-links a {
                     <div style="color: #c33; background-color: #fdd; font-weight: bold; margin-top: 2px; padding: 1px 4px 3px;">
                         <em>
                             No link provided! Try 
-                          <a href="http://scholar.google.com/scholar?q={{ url_quote(study.get('ot:studyPublicationReference').encode('utf-8')) }}"
+                          <a href="https://scholar.google.com/scholar?q={{ url_quote(study.get('ot:studyPublicationReference').encode('utf-8')) }}"
                             target="_blank" style="margin-top: 0; display: inline;">
                             Google Scholar</a> or 
-                          <a href="http://search.crossref.org/?q={{ url_quote(study.get('ot:studyPublicationReference').encode('utf-8')) }}"
+                          <a href="https://search.crossref.org/?q={{ url_quote(study.get('ot:studyPublicationReference').encode('utf-8')) }}"
                             target="_blank" style=" margin-top: 0; display: inline;">
                             CrossRef.org</a>
                         </em> 
@@ -110,14 +110,12 @@ div.contributing-studies div.links .tree-links a {
                   {% if study.get('commit_SHA_in_synthesis', None): %}
                   <a target="_blank" href="{{ API_load_study_GET_url.replace('{STUDY_ID}', study.get('ot:studyId')) }}?starting_commit_SHA={{ study.get('commit_SHA_in_synthesis') }}"
                     >Download version used in synthesis</a>
-                  {% endif %}
-                <!--
-                  <a target="_blank" href="http://www.reelab.net/phylografter/study/view/{{ study.get('ot:studyId')}}">Open in phylografter</a>
-                  -->
-                 {% if study.get('friendlyDepositMessage', None): %}
-                  {{ study.get('friendlyDepositMessage') |safe }}
-                 {% elif study.get('ot:dataDeposit', None): %}
-                  <a target="_blank"
+
+
+
+
+
+                      https://        <a target="_blank"
                      href="{{ latest_CrossRef_URL(study.get('ot:dataDeposit')) }}">Data deposit DOI/URL</a>
                  {% endif %}
               </div>

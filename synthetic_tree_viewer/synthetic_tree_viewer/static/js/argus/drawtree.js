@@ -106,10 +106,10 @@ function createArgus(spec) {
         spec.container = $("body")[0];
     }
     if (spec.treemachineDomain === undefined) {
-        spec.treemachineDomain = "http://opentree-dev.bio.ku.edu:7474";
+        spec.treemachineDomain = "https://opentree-dev.bio.ku.edu:7474";
     }
     if (spec.taxomachineDomain === undefined) {
-        spec.taxomachineDomain = "http://opentree-dev.bio.ku.edu:7476";
+        spec.taxomachineDomain = "https://opentree-dev.bio.ku.edu:7476";
     }
     if (spec.useTreemachine === undefined) {
         spec.useTreemachine = true; // for now, this is always true

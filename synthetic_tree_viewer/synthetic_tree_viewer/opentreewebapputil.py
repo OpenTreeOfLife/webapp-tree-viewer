@@ -301,7 +301,7 @@ def get_data_deposit_message(raw_deposit_doi):
     treebase_match = treebase_deposit_doi.search(raw_deposit_doi)
     if treebase_match:
         return (
-            '<a href="http://treebase.org/treebase-web/search/study/summary.html?'
+            '<a href="https://treebase.org/treebase-web/search/study/summary.html?'
             + 'id=%s" target="_blank">Data in Treebase</a>'
             % treebase_match.group("treebase_id")
         )

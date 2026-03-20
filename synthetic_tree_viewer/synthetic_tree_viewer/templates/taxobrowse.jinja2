@@ -145,17 +145,17 @@ var get_link_for_taxsrc = function (taxsrc) {
             var tstag = tsspl[0];
             var tsextid = tsspl[1];
             if (tstag == "ncbi") {
-                tsurl = "http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=" + tsextid;
+                tsurl = "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=" + tsextid;
             } else if (tstag == 'gbif') {
-                tsurl = "http://www.gbif.org/species/" + tsextid + "/";
+                tsurl = "https://www.gbif.org/species/" + tsextid + "/";
             } else if (tstag == 'irmng') {
-                tsurl = "http://www.irmng.org/aphia.php?p=taxdetails&id=" + tsextid;
+                tsurl = "https://www.irmng.org/aphia.php?p=taxdetails&id=" + tsextid;
             } else if (tstag == 'if') {
-                tsurl = "http://www.indexfungorum.org/names/NamesRecord.asp?RecordID=" + tsextid;
+                tsurl = "https://www.indexfungorum.org/names/NamesRecord.asp?RecordID=" + tsextid;
             } else if (tstag == 'worms') {
-                tsurl = "http://www.marinespecies.org/aphia.php?p=taxdetails&id=" + tsextid;
+                tsurl = "https://www.marinespecies.org/aphia.php?p=taxdetails&id=" + tsextid;
             } else if (tstag == 'silva') {
-                tsurl = "http://www.arb-silva.de/browser/ssu/silva/" + tsextid;
+                tsurl = "https://www.arb-silva.de/browser/ssu/silva/" + tsextid;
             } else {
                 var id_parts = tstag.split("-");
                 if (id_parts.length > 1) {
