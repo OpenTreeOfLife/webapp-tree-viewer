@@ -9,7 +9,6 @@ from synthetic_tree_viewer.util import (
     get_opentree_api_endpoints,
     latest_CrossRef_URL,
     fetch_current_TNRS_context_names,
-    add_local_comments_markup,
     AUTH_CONFIG,
     login_required,
 )
@@ -83,7 +82,7 @@ def contact(request):
             ),
         }
     )
-    add_local_comments_markup(request, view_dict)
+    # add_local_comments_markup(request, view_dict)
     return view_dict
 
 
@@ -292,5 +291,5 @@ def tree_view(request):
         view_dict["forcedByURL"] = True
 
     view_dict["filter"] = "skip_comments"
-    add_local_comments_markup(request, view_dict)
+    # add_local_comments_markup(request, view_dict)
     return view_dict

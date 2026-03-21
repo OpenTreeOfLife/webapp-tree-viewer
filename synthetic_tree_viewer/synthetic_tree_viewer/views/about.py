@@ -7,7 +7,6 @@ from synthetic_tree_viewer.util import (
     get_domain_banner_hovertext,
     get_currently_deployed_opentree_branch,
     get_opentree_api_endpoints,
-    add_local_comments_markup,
     latest_CrossRef_URL,
     fetch_current_TNRS_context_names,
     get_data_deposit_message,
@@ -57,7 +56,7 @@ ot_cleaner = Cleaner(tags=ot_markdown_tags, attributes=ot_markdown_attributes)
 def _minimal_about_viewdict(request):
     # First, copy our boilerplate config vars (getDraftTreeID_url, etc)
     view_dict = get_opentree_api_endpoints(request)
-    add_local_comments_markup(request, view_dict)
+    # add_local_comments_markup(request, view_dict)
 
     # Then add/override with these explicit key-value pairs
     view_dict.update(
