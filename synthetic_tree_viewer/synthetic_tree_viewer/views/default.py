@@ -18,6 +18,7 @@ import json
 import requests
 from pyramid.httpexceptions import HTTPNotFound, HTTPSeeOther
 from pyramid_retry import RetryableException
+from synthetic_tree_viewer.tree_view_dict_mgr import update_tree_view_dict
 
 try:
     from urllib import unquote_plus
@@ -92,12 +93,6 @@ def contact(request):
 )
 def taxobrowse(request):
     view_dict = get_opentree_api_endpoints(request)
-    # view_dict.update({
-    #    'taxonSearchContextNames': fetch_current_TNRS_context_names(request),
-    #    'conf': get_conf(request),  # needed for the footer diagnostics
-    #    'currently_deployed_opentree_branch': get_currently_deployed_opentree_branch(request),
-    #    })
-    # add_local_comments_markup(request, view_dict)
     return view_dict
 
 
@@ -226,10 +221,10 @@ def login(request):
 def tree_view(request):
     full_path = request.matchdict["full_path"]
     path_parts = full_path.split("/")
-    view_dict = get_opentree_api_endpoints(request)
-
-    # retrieve latest synthetic-tree ID (and its 'life' node ID)
-    # TODO: Refresh this periodically? or only when needed for initial destination?
+    rset = request.registry.settings
+    etvd = rset["extra_tree_view_dict"]
+    update_tree_view_dict(rset, etvd)
+    view_dict = dict(etvd)
     try:
         tree_version, startingNodeID = fetch_current_synthetic_tree_ids(request)
     except Exception as e:
@@ -238,36 +233,16 @@ def tree_view(request):
     # Then add/override with these explicit key-value pairs
     view_dict.update(
         {
-            # NB - Duplicate keys will be resolved in favor of the values below!
-            "conf": get_conf(request),  # needed for the footer diagnostics
-            "project_name": "synthetic tree viewer",
-            #'session': request.session,
-            "response": request.response,
-            "registry": request.registry,
-            "currently_deployed_opentree_branch": get_currently_deployed_opentree_branch(
-                request
-            ),
-            # NB - some values will be filled in (or modified) below
-            "nodeID": "",
-            "nodeName": "",
-            "viewport": "",
-            "taxonSearchContextNames": fetch_current_TNRS_context_names(request),
-            "nudgingToLatestSyntheticTree": False,
-            "forcedByURL": False,
             "draftTreeName": tree_version,
             "startingNodeID": startingNodeID,
-            "incomingDomSource": "none",
             "showLegendOnLoad": request.params.get("show-legend") or False,
-            "domain_banner_text": get_domain_banner_text(request),
-            "domain_banner_hovertext": get_domain_banner_hovertext(request),
         }
     )
 
-    if request.params.get("parentWindowURL", None):
-        plain_feedback_url = unquote_plus(request.params.get("parentWindowURL"))
-        view_dict["feedbackParentWindowURL"] = plain_feedback_url
-    else:
-        view_dict["feedbackParentWindowURL"] = None
+    plain_feedback_url = request.params.get("parentWindowURL")
+    if plain_feedback_url is not None:
+        plain_feedback_url = unquote_plus(plain_feedback_url)
+    view_dict["feedbackParentWindowURL"] = plain_feedback_url
 
     # examine the path parts of the incoming URL to correctly target the view
     if len(path_parts) > 0:

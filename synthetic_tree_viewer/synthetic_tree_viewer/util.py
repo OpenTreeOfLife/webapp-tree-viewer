@@ -9,6 +9,7 @@ from pyramid.httpexceptions import (
     HTTPSeeOther,
 )
 import datetime
+import requests
 
 import logging
 
@@ -85,19 +86,19 @@ def get_conf(request):
     return _CONFIG_REGISTRY.get(app_name)
 
 
-def get_domain_banner_text(request):
+def get_domain_banner_text(subdomain):
     # Add an optional CSS banner to indicate a test domain, or none if
     # we're on a production server.
-    if request.domain == "tree.opentreeoflife.org":
+    if subdomain == "tree":
         return ""
     # all other domains (including 'devtree.opentreeoflife.org') should present as dev servers
     return "DEVELOPMENT"
 
 
-def get_domain_banner_hovertext(request):
+def get_domain_banner_hovertext(subdomain):
     # Return optional hover-text for dev+test domains, or none if
     # we're on a production server.
-    if request.domain == "tree.opentreeoflife.org":
+    if subdomain == "tree":
         return ""
     # all other domains (including 'devtree.opentreeoflife.org') should present as dev servers
     # N.B. Line lengths gradually change, since this text fits diagonally in the page corner.
@@ -113,24 +114,30 @@ def get_domain_banner_hovertext(request):
     )
 
 
-def get_currently_deployed_opentree_branch(request):
+_curr_depl_branch = None
+
+
+def get_currently_deployed_opentree_branch():
     """Read local git configuration and return the current branch"""
+    global _curr_depl_branch
+    if _curr_depl_branch is not None:
+        return _curr_depl_branch
     # Backtrack to the real (vs. symlinked) filesystem path for this app
     this_file_dir = os.getcwd()
     infilepath = os.path.join(this_file_dir, "..", ".git", "HEAD")
-    branch_name = "NOT FOUND (app is not inside a git repo?)"
+    _curr_depl_branch = "NOT FOUND (app is not inside a git repo?)"
     try:
         infile = open(infilepath)
         for line in infile:
             if "ref:" in line:
                 # FOR EXAMPLE:
                 #   ref: refs/heads/mystery-branch\n
-                branch_name = line.split("/")[-1].strip()
+                _curr_depl_branch = line.split("/")[-1].strip()
                 break
         infile.close()
     except:
         pass
-    return branch_name
+    return _curr_depl_branch
 
 
 def latest_CrossRef_URL(url):
@@ -222,16 +229,16 @@ def get_user_display_name(request):
         return "ANONYMOUS"
 
 
-def fetch_current_TNRS_context_names(request):
-    try:
-        # fetch the latest contextName values as JSON from remote site
-        import requests
+_curr_context_names = None
 
-        method_dict = get_opentree_api_endpoints(request)
-        fetch_url = method_dict["getContextsJSON_url"]
-        if fetch_url.startswith("//"):
-            # Prepend scheme to a scheme-relative URL
-            fetch_url = "https:%s" % fetch_url
+
+def fetch_current_TNRS_context_names(rset):
+    global _curr_context_names
+    if _curr_context_names is not None:
+        return _curr_context_names
+    method_dict = rset["api_endpoints"]
+    fetch_url = method_dict["getContextsJSON_url"]
+    try:
 
         # as usual, this needs to be a POST (pass empty fetch_args)
         contextnames_json = requests.post(url=fetch_url, data="").json()
@@ -244,8 +251,8 @@ def fetch_current_TNRS_context_names(request):
             # allow for eventual removal or renaming of expected groups
             if gname in contextnames_json:
                 context_names += [n for n in contextnames_json[gname]]
-        return context_names
-
+        _curr_context_names = context_names
+        return _curr_context_names
     except Exception as e:
         # throw 403 or 500 or just leave it
         return "ERROR", e.message
