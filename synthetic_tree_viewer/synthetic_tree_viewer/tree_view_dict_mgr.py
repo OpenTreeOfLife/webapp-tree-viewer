@@ -14,59 +14,8 @@ def create_tree_view_dict(rset):
     subdomain = rset.get("opentree.subdomain", "devtree")
     dbt = get_domain_banner_text(subdomain)
     dbht = get_domain_banner_hovertext(subdomain)
-    # ctns = fetch_current_TNRS_context_names(rset)
-    # TEMP, hard-coded
-    _LOG.warn("Currently hard-coding TNRS contexts")
-    ctns = [
-        "All life",
-        "Land plants",
-        "Hornworts",
-        "Mosses",
-        "Liverworts",
-        "Vascular plants",
-        "Club mosses",
-        "Ferns",
-        "Seed plants",
-        "Flowering plants",
-        "Monocots",
-        "Eudicots",
-        "Rosids",
-        "Asterids",
-        "Asterales",
-        "Asteraceae",
-        "Aster",
-        "Symphyotrichum",
-        "Campanulaceae",
-        "Lobelia",
-        "Animals",
-        "Birds",
-        "Tetrapods",
-        "Mammals",
-        "Amphibians",
-        "Vertebrates",
-        "Arthropods",
-        "Molluscs",
-        "Nematodes",
-        "Platyhelminthes",
-        "Annelids",
-        "Cnidarians",
-        "Arachnids",
-        "Insects",
-        "Fungi",
-        "Basidiomycetes",
-        "Ascomycetes",
-        "Bacteria",
-        "SAR group",
-        "Archaea",
-        "Excavata",
-        "Amoebozoa",
-        "Centrohelida",
-        "Haptophyta",
-        "Apusozoa",
-        "Diatoms",
-        "Ciliates",
-        "Forams",
-    ]
+    ctns = fetch_current_TNRS_context_names(rset)
+
     tvd = {
         # NB - Duplicate keys will be resolved in favor of the values below!
         "project_name": "synthetic tree viewer",

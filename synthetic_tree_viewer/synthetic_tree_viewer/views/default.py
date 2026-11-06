@@ -7,9 +7,9 @@ from synthetic_tree_viewer.util import (
     get_domain_banner_hovertext,
     get_opentree_api_endpoints,
     latest_CrossRef_URL,
-    fetch_current_TNRS_context_names,
     AUTH_CONFIG,
     login_required,
+    get_copy_of_view_dict,
 )
 from synthetic_tree_viewer import fetch_current_synthetic_tree_ids
 import json

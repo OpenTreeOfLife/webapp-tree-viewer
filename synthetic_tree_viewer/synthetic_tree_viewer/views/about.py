@@ -7,7 +7,6 @@ from synthetic_tree_viewer.util import (
     get_domain_banner_hovertext,
     get_opentree_api_endpoints,
     latest_CrossRef_URL,
-    fetch_current_TNRS_context_names,
     get_data_deposit_message,
 )
 from pyramid.httpexceptions import (

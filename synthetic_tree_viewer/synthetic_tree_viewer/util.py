@@ -199,29 +199,81 @@ _curr_context_names = None
 
 
 def fetch_current_TNRS_context_names(rset):
-    global _curr_context_names
-    if _curr_context_names is not None:
-        return _curr_context_names
-    method_dict = rset["api_endpoints"]
-    fetch_url = method_dict["getContextsJSON_url"]
-    try:
+    # TEMP, hard-coded
+    _LOG.warn("Currently hard-coding TNRS contexts")
+    return [
+        "All life",
+        "Land plants",
+        "Hornworts",
+        "Mosses",
+        "Liverworts",
+        "Vascular plants",
+        "Club mosses",
+        "Ferns",
+        "Seed plants",
+        "Flowering plants",
+        "Monocots",
+        "Eudicots",
+        "Rosids",
+        "Asterids",
+        "Asterales",
+        "Asteraceae",
+        "Aster",
+        "Symphyotrichum",
+        "Campanulaceae",
+        "Lobelia",
+        "Animals",
+        "Birds",
+        "Tetrapods",
+        "Mammals",
+        "Amphibians",
+        "Vertebrates",
+        "Arthropods",
+        "Molluscs",
+        "Nematodes",
+        "Platyhelminthes",
+        "Annelids",
+        "Cnidarians",
+        "Arachnids",
+        "Insects",
+        "Fungi",
+        "Basidiomycetes",
+        "Ascomycetes",
+        "Bacteria",
+        "SAR group",
+        "Archaea",
+        "Excavata",
+        "Amoebozoa",
+        "Centrohelida",
+        "Haptophyta",
+        "Apusozoa",
+        "Diatoms",
+        "Ciliates",
+        "Forams",
+    ]
+    # global _curr_context_names
+    # if _curr_context_names is not None:
+    #     return _curr_context_names
+    # method_dict = rset["api_endpoints"]
+    # fetch_url = method_dict["getContextsJSON_url"]
+    # try:
 
-        # as usual, this needs to be a POST (pass empty fetch_args)
-        contextnames_json = requests.post(url=fetch_url, data="").json()
-        # start with LIFE group (incl. 'All life'), and add any other ordered suggestions
-        ordered_group_names = unique_ordered_list(
-            ["LIFE", "PLANTS", "ANIMALS"] + [g for g in contextnames_json]
-        )
-        context_names = []
-        for gname in ordered_group_names:
-            # allow for eventual removal or renaming of expected groups
-            if gname in contextnames_json:
-                context_names += [n for n in contextnames_json[gname]]
-        _curr_context_names = context_names
-        return _curr_context_names
-    except Exception as e:
-        # throw 403 or 500 or just leave it
-        return "ERROR", str(e)
+    #     # as usual, this needs to be a POST (pass empty fetch_args)
+    #     contextnames_json = requests.post(url=fetch_url, data="").json()
+    #     # start with LIFE group (incl. 'All life'), and add any other ordered suggestions
+    #     ordered_group_names = unique_ordered_list(
+    #         ["LIFE", "PLANTS", "ANIMALS"] + [g for g in contextnames_json]
+    #     )
+    #     context_names = []
+    #     for gname in ordered_group_names:
+    #         # allow for eventual removal or renaming of expected groups
+    #         if gname in contextnames_json:
+    #             context_names += [n for n in contextnames_json[gname]]
+    #     _curr_context_names = context_names
+    #     return _curr_context_names
+    # except Exception as e:
+    #     # throw 403 or 500 or just leave it
+    #     return "ERROR", str(e)
 
 
 def unique_ordered_list(seq):
