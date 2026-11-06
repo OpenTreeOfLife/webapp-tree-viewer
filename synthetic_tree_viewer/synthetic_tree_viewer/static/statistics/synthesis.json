@@ -2,7 +2,7 @@
     "2014-04-14T00Z": {
         "===": "These 'comments' will be ignored by the app.",
         "version": "v1",
-        "===": "Based on file mod-date shown in http://files.opentreeoflife.org/trees/",
+        "===": "Based on file mod-date shown in https://files.opentreeoflife.org/trees/",
         "OTT_version": "ott2.6",
         "tree_count": null,
         "total_OTU_count": null,
@@ -71,7 +71,7 @@
     },
     "2017-03-22T11Z": {
         "===": "tree_count and tip_count from https://devapi.opentreeoflife.org/v3/tree_of_life/about",
-        "===": "total_OTU_count found in http://files.opentreeoflife.org/synthesis/opentree9.1/output/labelled_supertree/index.html",
+        "===": "total_OTU_count found in https://files.opentreeoflife.org/synthesis/opentree9.1/output/labelled_supertree/index.html",
         "version": "v9.1",
         "OTT_version": "ott3.0draft6",
         "tree_count": 819,
@@ -80,7 +80,7 @@
     },
     "2018-01-09T00Z": {
         "===": "tree_count and tip_count from https://devapi.opentreeoflife.org/v3/tree_of_life/about",
-        "===": "total_OTU_count found in http://files.opentreeoflife.org/synthesis/opentree10.2/output/labelled_supertree/index.html",
+        "===": "total_OTU_count found in https://files.opentreeoflife.org/synthesis/opentree10.2/output/labelled_supertree/index.html",
         "version": "v10.2",
         "OTT_version": "ott3.0draft6",
         "tree_count": 954,
@@ -89,7 +89,7 @@
     },
     "2018-07-02T00Z": {
         "===": "tree_count and tip_count from https://devapi.opentreeoflife.org/v3/tree_of_life/about",
-        "===": "total_OTU_count found in http://files.opentreeoflife.org/synthesis/opentree10.3/output/labelled_supertree/index.html",
+        "===": "total_OTU_count found in https://files.opentreeoflife.org/synthesis/opentree10.3/output/labelled_supertree/index.html",
         "version": "v10.3",
         "OTT_version": "ott3.0draft6",
         "tree_count": 974,
@@ -98,7 +98,7 @@
     },
     "2018-09-24T00Z": {
         "===": "tree_count and tip_count from https://devapi.opentreeoflife.org/v3/tree_of_life/about",
-        "===": "total_OTU_count found in http://files.opentreeoflife.org/synthesis/opentree10.3/output/labelled_supertree/index.html",
+        "===": "total_OTU_count found in https://files.opentreeoflife.org/synthesis/opentree10.3/output/labelled_supertree/index.html",
         "version": "v10.4",
         "OTT_version": "ott3.0draft6",
         "tree_count": 987,

@@ -51,11 +51,11 @@ def fetch_current_synthetic_tree_ids(request):
         ).json()
         draftTreeName = str(ids_json["synth_id"])
         startNodeID = str(ids_json["root"]["node_id"])
-        return (draftTreeName, startNodeID)
+        return draftTreeName, startNodeID
 
     except Exception as e:
         # throw 403 or 500 or just leave it
-        return ("ERROR", str(e))
+        return "ERROR", str(e)
 
 
 # Disablng PhyloPic features for now...
@@ -245,6 +245,8 @@ def login(request):
     route_name="tree_view", renderer="synthetic_tree_viewer:templates/tree_view.jinja2"
 )
 def tree_view(request):
+    log.debug(f"... entering tree_view matchdict = {dict(request.matchdict)}")
+    log.debug(f"       request.registry.settings = {dict(request.registry.settings)}")
     try:
         from urllib import unquote_plus
     except ImportError:
