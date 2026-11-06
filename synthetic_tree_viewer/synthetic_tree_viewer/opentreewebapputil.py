@@ -8,13 +8,15 @@ from pyramid.request import Request
 from pyramid.httpexceptions import (
     HTTPNotFound,
     HTTPSeeOther,
-    )
+)
 import logging
+
 log = logging.getLogger(__name__)
 
 
 # hold persistent config object(s)
 _CONFIG_REGISTRY = {}
+
 
 def get_github_client_secret():
     client_secret_path = "../private/GITHUB_CLIENT_SECRET"
@@ -27,6 +29,7 @@ def get_github_client_secret():
         print(err_msg)
         raise Exception(err_msg)
 
+
 def get_conf(request):
     # get app-specific settings (e.g. API URLs)
     global _CONFIG_REGISTRY
@@ -34,39 +37,49 @@ def get_conf(request):
     app_name = request.registry.package_name
     if _CONFIG_REGISTRY.get(app_name) is None:
         from configparser import ConfigParser
+
         # ignore interpolation % markers in logging formatters!
         conf = ConfigParser(interpolation=None)
         # DON'T convert property names to lower-case!
         conf.optionxform = str
         # Our monolithic app-config file includes its own absolute filesystem path;
         # use this to parse and load API endpoints, etc.
-        test_config_path = request.registry.settings.get('path_to_app_config', '')
+        test_config_path = request.registry.settings.get("path_to_app_config", "")
         config_file_found = None
         more_info = None
         try:
             prior2_path_exists = os.path.exists("/home/deploy/configs")
-            prior_path_exists = os.path.exists("/home/deploy/configs/synthetic_tree_viewer")
-            exact_path_exists = os.path.exists("/home/deploy/configs/synthetic_tree_viewer/treeview_app_config.ini")
-            exact_path_is_file = os.path.isfile("/home/deploy/configs/synthetic_tree_viewer/treeview_app_config.ini")
+            prior_path_exists = os.path.exists(
+                "/home/deploy/configs/synthetic_tree_viewer"
+            )
+            exact_path_exists = os.path.exists(
+                "/home/deploy/configs/synthetic_tree_viewer/treeview_app_config.ini"
+            )
+            exact_path_is_file = os.path.isfile(
+                "/home/deploy/configs/synthetic_tree_viewer/treeview_app_config.ini"
+            )
             path_exists = os.path.exists(test_config_path)
             path_is_file = os.path.isfile(test_config_path)
             if os.path.isfile(test_config_path):
                 config_file_found = test_config_path
                 conf.read(test_config_path)
-            assert 'apis' in conf.sections()
+            assert "apis" in conf.sections()
             _CONFIG_REGISTRY[app_name] = conf
         except:
             print("\n=== WEB-APP CONFIG NOT FOUND, INVALID, OR INCOMPLETE ===")
             if config_file_found is None:
                 import pwd
+
                 err_msg = "Webapp config not found (as user {})! Expecting it in this location:\n  {}"
                 err_msg = err_msg.format(
-                   pwd.getpwuid( os.geteuid() ).pw_name,
-                   test_config_path,
-                   )
+                    pwd.getpwuid(os.geteuid()).pw_name,
+                    test_config_path,
+                )
                 print(err_msg)
                 raise Exception(err_msg)
-            err_msg = "Webapp config file ({}) is broken or incomplete (missing [apis] section)".format(config_file_found)
+            err_msg = "Webapp config file ({}) is broken or incomplete (missing [apis] section)".format(
+                config_file_found
+            )
             print(err_msg)
             log.debug(err_msg)
             raise Exception(err_msg)
@@ -74,54 +87,63 @@ def get_conf(request):
         conf.set("apis", "github_client_secret", get_github_client_secret())
     return _CONFIG_REGISTRY.get(app_name)
 
+
 def get_domain_banner_text(request):
     # Add an optional CSS banner to indicate a test domain, or none if
     # we're on a production server.
-    if request.domain == 'tree.opentreeoflife.org':
-        return ''
+    if request.domain == "tree.opentreeoflife.org":
+        return ""
     # all other domains (including 'devtree.opentreeoflife.org') should present as dev servers
-    return 'DEVELOPMENT'
+    return "DEVELOPMENT"
+
 
 def get_domain_banner_hovertext(request):
     # Return optional hover-text for dev+test domains, or none if
     # we're on a production server.
-    if request.domain == 'tree.opentreeoflife.org':
+    if request.domain == "tree.opentreeoflife.org":
         return ""
     # all other domains (including 'devtree.opentreeoflife.org') should present as dev servers
     # N.B. Line lengths gradually change, since this text fits diagonally in the page corner.
     # Be sure to test any changes!
-    return '<br/>'.join(["This is a development version",
-                         "of the Open Tree of Life website!",
-                         "Data and services may be out of date or",
-                         "untested. The production site (the place to",
-                         "do real work) is <a href='https://tree.opentreeoflife.org/'>tree.opentreeoflife.org</a>."])
+    return "<br/>".join(
+        [
+            "This is a development version",
+            "of the Open Tree of Life website!",
+            "Data and services may be out of date or",
+            "untested. The production site (the place to",
+            "do real work) is <a href='https://tree.opentreeoflife.org/'>tree.opentreeoflife.org</a>.",
+        ]
+    )
+
 
 def get_currently_deployed_opentree_branch(request):
     """Read local git configuration and return the current branch"""
     # Backtrack to the real (vs. symlinked) filesystem path for this app
     this_file_dir = os.getcwd()
-    infilepath = os.path.join(this_file_dir, '..', '.git', 'HEAD')
-    branch_name = 'NOT FOUND (app is not inside a git repo?)'
+    infilepath = os.path.join(this_file_dir, "..", ".git", "HEAD")
+    branch_name = "NOT FOUND (app is not inside a git repo?)"
     try:
         infile = open(infilepath)
         for line in infile:
-            if 'ref:' in line:
+            if "ref:" in line:
                 # FOR EXAMPLE:
                 #   ref: refs/heads/mystery-branch\n
-                branch_name = line.split('/')[-1].strip()
+                branch_name = line.split("/")[-1].strip()
                 break
         infile.close()
     except:
         pass
     return branch_name
 
+
 def latest_CrossRef_URL(url):
-    if (not url):
-        return ''
-    return url.replace('http://dx.doi.org/', 'https://doi.org/')
+    if not url:
+        return ""
+    return url.replace("http://dx.doi.org/", "https://doi.org/")
+
 
 def get_opentree_api_base_urls(request):
-    '''
+    """
     Reads the local configuration to get the base URLs and returns a dictionary
         with keys:
             default_apis
@@ -132,16 +154,17 @@ def get_opentree_api_base_urls(request):
 
     This is mainly useful for debugging because it lets developers use local
         instances of the service by tweaking app_config (see app_config.example)
-    '''
+    """
     conf = get_conf(request)
-    base_url_pairs = conf.items('api_base_urls')
+    base_url_pairs = conf.items("api_base_urls")
     base_urls = dict()
     for name, url in base_url_pairs:
-        base_urls[ name ] = url
+        base_urls[name] = url
     return base_urls
 
+
 def get_opentree_api_endpoints(request):
-    '''
+    """
     Reads the local configuration to build on base URLs and return a dictionary
          with keys for all API endpoints (method URLs) combining base URLs
          and partial paths for each method
@@ -149,25 +172,26 @@ def get_opentree_api_endpoints(request):
     This is useful for debugging and for adapting to different ways of
         configuring services, eg, proxied through a single domain
         (see app_config.example)
-    '''
+    """
     base_urls = get_opentree_api_base_urls(request)
 
     conf = get_conf(request)
-    url_pairs = conf.items('api_endpoints')
+    url_pairs = conf.items("api_endpoints")
     api_endpoints = base_urls.copy()
     for mname, murl in url_pairs:
         # replace any domain tokens, eg, 'default_apis'
         for dname, durl in base_urls.items():
-            murl = murl.replace('{%s}' % dname, durl)
-        api_endpoints[ mname ] = murl
+            murl = murl.replace("{%s}" % dname, durl)
+        api_endpoints[mname] = murl
 
     return api_endpoints
+
 
 def add_local_comments_markup(request, view_dict={}):
     # create a subrequest to pass local-comments HTML to the renderer
     # copy relevant parts of current request (to correctly locate comments)
-    comments_path = '/opentree/plugin_localcomments'
-    specified_filter = view_dict.get('filter', None)
+    comments_path = "/opentree/plugin_localcomments"
+    specified_filter = view_dict.get("filter", None)
 
     """
     log.debug("  request method (HTTP verb): {}".format(request.method or 'NONE'))
@@ -176,42 +200,47 @@ def add_local_comments_markup(request, view_dict={}):
     log.debug("  RESPONSE.content_type: {}".format(request.response.content_type or 'NONE'))
     """
 
-    subreq = Request.blank(comments_path,
-                           #environ=request.environ,  # OVERRIDES our desired URL!
-                           headers=request.headers,
-                           POST=request.POST,         # TODO: use POST for subrequest?
-                          )
+    subreq = Request.blank(
+        comments_path,
+        # environ=request.environ,  # OVERRIDES our desired URL!
+        headers=request.headers,
+        POST=request.POST,  # TODO: use POST for subrequest?
+    )
 
     # Use its environment to store hints to help "locate" the new comments
     if specified_filter:
         # if specified, this should override any existing 'filter' value
-        #request.POST['filter'] = specified_filter  # FAILS if not already a POST/form
-        subreq.environ['filter'] = specified_filter
-    subreq.environ['original_url'] = request.url
+        # request.POST['filter'] = specified_filter  # FAILS if not already a POST/form
+        subreq.environ["filter"] = specified_filter
+    subreq.environ["original_url"] = request.url
 
     comments_response = request.invoke_subrequest(subreq)
-    view_dict.update({
-        'local_comments_markup': comments_response.body.decode('utf-8')
-        })
-    #import pdb; pdb.set_trace()
-    print("local comments char count? {}".format(len(view_dict['local_comments_markup'])))
+    view_dict.update({"local_comments_markup": comments_response.body.decode("utf-8")})
+    # import pdb; pdb.set_trace()
+    print(
+        "local comments char count? {}".format(len(view_dict["local_comments_markup"]))
+    )
 
     # is this even required? any dict argument is already changed!
     return view_dict
 
+
 def user_is_logged_in(request):
-    return request.session.get('auth_user', None) and True or False
+    return request.session.get("auth_user", None) and True or False
+
 
 def get_auth_user(request):
-    return request.session.get('auth_user', None)
+    return request.session.get("auth_user", None)
+
 
 def get_user_display_name(request):
     # Determine the best possible name to show for the current logged-in user.
     # This is for display purposes and credit in study Nexson.
     try:
-        return request.session['auth_user'].get('display_name')
+        return request.session["auth_user"].get("display_name")
     except:
-        return 'ANONYMOUS'
+        return "ANONYMOUS"
+
 
 def fetch_current_TNRS_context_names(request):
     try:
@@ -219,34 +248,42 @@ def fetch_current_TNRS_context_names(request):
         import requests
 
         method_dict = get_opentree_api_endpoints(request)
-        fetch_url = method_dict['getContextsJSON_url']
-        if fetch_url.startswith('//'):
+        fetch_url = method_dict["getContextsJSON_url"]
+        if fetch_url.startswith("//"):
             # Prepend scheme to a scheme-relative URL
             fetch_url = "https:%s" % fetch_url
 
         # as usual, this needs to be a POST (pass empty fetch_args)
-        contextnames_json = requests.post(url=fetch_url, data='').json()
+        contextnames_json = requests.post(url=fetch_url, data="").json()
         # start with LIFE group (incl. 'All life'), and add any other ordered suggestions
-        ordered_group_names = unique_ordered_list(['LIFE','PLANTS','ANIMALS'] + [g for g in contextnames_json])
-        context_names = [ ]
+        ordered_group_names = unique_ordered_list(
+            ["LIFE", "PLANTS", "ANIMALS"] + [g for g in contextnames_json]
+        )
+        context_names = []
         for gname in ordered_group_names:
             # allow for eventual removal or renaming of expected groups
             if gname in contextnames_json:
-                context_names += [n for n in contextnames_json[gname] ]
+                context_names += [n for n in contextnames_json[gname]]
 
         # draftTreeName = str(ids_json['draftTreeName']).encode('utf-8')
-        return (context_names)
+        return context_names
 
     except Exception as e:
         # throw 403 or 500 or just leave it
-        return ('ERROR', e.message)
+        return ("ERROR", e.message)
+
 
 def unique_ordered_list(seq):
     seen = set()
     seen_add = seen.add
-    return [ x for x in seq if x not in seen and not seen_add(x)]
+    return [x for x in seq if x not in seen and not seen_add(x)]
 
-treebase_deposit_doi = re.compile('//purl.org/phylo/treebase/phylows/study/TB2:S(?P<treebase_id>\d+)')
+
+treebase_deposit_doi = re.compile(
+    "//purl.org/phylo/treebase/phylows/study/TB2:S(?P<treebase_id>\d+)"
+)
+
+
 def get_data_deposit_message(raw_deposit_doi):
     # Returns a *compact* hyperlink (HTML) to study data, or an empty string if
     # no DOI/URL is found. Some cryptic dataDeposit URLs require more
@@ -255,37 +292,43 @@ def get_data_deposit_message(raw_deposit_doi):
     # NOTE that we maintain a client-side counterpart in
     # curator/static/js/study-editor.js > getDataDepositMessage
     raw_deposit_doi = raw_deposit_doi.strip()
-    if raw_deposit_doi == '':
-        return ''
+    if raw_deposit_doi == "":
+        return ""
 
     # TreeBASE URLs should point to a web page (vs RDF)
     # EXAMPLE: http://purl.org/phylo/treebase/phylows/study/TB2:S13451
     #    => http://treebase.org/treebase-web/search/study/summary.html?id=13451
     treebase_match = treebase_deposit_doi.search(raw_deposit_doi)
     if treebase_match:
-        return ('<a href="http://treebase.org/treebase-web/search/study/summary.html?'+
-               'id=%s" target="_blank">Data in Treebase</a>' % treebase_match.group('treebase_id'))
- 
+        return (
+            '<a href="http://treebase.org/treebase-web/search/study/summary.html?'
+            + 'id=%s" target="_blank">Data in Treebase</a>'
+            % treebase_match.group("treebase_id")
+        )
+
     # TODO: Add other substitutions?
 
-    return ('<a target="_blank" href="%s">Data deposit DOI/URL</a>' % raw_deposit_doi)
+    return '<a target="_blank" href="%s">Data deposit DOI/URL</a>' % raw_deposit_doi
+
 
 # https://authomatic.github.io/authomatic/reference/adapters.html
 # https://authomatic.github.io/authomatic/reference/providers.html#authomatic.providers.oauth2.GitHub
 from authomatic.providers import oauth2
+
 AUTH_CONFIG = {
-    'github': {
-        'id': 1,  # REQUIRED for login_result.user.to_dict(), but usually login_result.user.data is plenty of information
-        'class_': oauth2.GitHub,
-        'consumer_key': 'Iv1.226d54b87d23855d',   # WAS github_client_id
-        'consumer_secret': get_github_client_secret(),
-        'access_headers': {'User-Agent': 'Awesome-Octocat-App'},
-        'scope': ['user', 'user:email' ],
+    "github": {
+        "id": 1,  # REQUIRED for login_result.user.to_dict(), but usually login_result.user.data is plenty of information
+        "class_": oauth2.GitHub,
+        "consumer_key": "Iv1.226d54b87d23855d",  # WAS github_client_id
+        "consumer_secret": get_github_client_secret(),
+        "access_headers": {"User-Agent": "Awesome-Octocat-App"},
+        "scope": ["user", "user:email"],
         #'redirect_uri': 'https://devtree.opentreeoflife.org/opentree/user/login',   # MATCH the app configuration exactly
         ## NB - This is apparently replaced by the *current* URL, so its route must match exactly..
         ## It's POSSIBLE that we can define multiple redirect-uri's in Github app config, then specify one of them here
     }
- }
+}
+
 
 def login_required(decorated_function):
     """
@@ -293,6 +336,7 @@ def login_required(decorated_function):
     and (if found) when they expire. If expiry is imminent, refresh them now!
     If credentials aren't found, login via OAuth, then bounce back to the current URL.
     """
+
     @functools.wraps(decorated_function)
     def wrapper(request, *args, **kwargs):
         # IF user is logged in, call this view normally; otherwise login (or refresh credentials)
@@ -302,7 +346,9 @@ def login_required(decorated_function):
             return decorated_function(request, *args, **kwargs)
         else:
             # TODO: redirect to login view (then bounce back to the current URL)
-            relative_url = request.route_path('oauth_login', _query={'_next': request.url})
+            relative_url = request.route_path(
+                "oauth_login", _query={"_next": request.url}
+            )
             return HTTPSeeOther(location=relative_url)
 
     return wrapper
@@ -315,7 +361,8 @@ def fetch_github_app_auth_token(request):
 
     # build a new JWT, since they expire
     import python_jwt as jwt, jwcrypto.jwk as jwk, datetime, requests
-    #key = jwk.JWK.generate(kty='RSA', size=2048)
+
+    # key = jwk.JWK.generate(kty='RSA', size=2048)
     conf = get_conf(request)
     try:
         github_app_id = conf.get("apis", "github_app_id")
@@ -330,9 +377,11 @@ def fetch_github_app_auth_token(request):
     # load our GitHub app's private key from a separate file (kept out of source repo)
     if os.path.isfile("../private/GITHUB_APP_PRIVATE_KEY_PEM"):
         try:
-            private_key_pem = open("../private/GITHUB_APP_PRIVATE_KEY_PEM", "rb").read().strip()
+            private_key_pem = (
+                open("../private/GITHUB_APP_PRIVATE_KEY_PEM", "rb").read().strip()
+            )
             private_key = jwk.JWK.from_pem(private_key_pem)
-            #key_json = private_key.export(private_key=True)
+            # key_json = private_key.export(private_key=True)
         except:
             raise Exception("Invalid private-key .pem!")
     else:
@@ -340,23 +389,33 @@ def fetch_github_app_auth_token(request):
 
     payload = {
         # issued at time
-        'iat': datetime.timedelta(minutes=0),
+        "iat": datetime.timedelta(minutes=0),
         # JWT expiration time (10 min max)
-        'exp': datetime.timedelta(minutes=10),
+        "exp": datetime.timedelta(minutes=10),
         # issuer? (GitHub app identifier)
-        'iss': github_app_id,
+        "iss": github_app_id,
     }
-    app_jwt = jwt.generate_jwt(payload, private_key, 'RS256', datetime.timedelta(minutes=5))
+    app_jwt = jwt.generate_jwt(
+        payload, private_key, "RS256", datetime.timedelta(minutes=5)
+    )
     # use this JWT to request an auth token for the current GitHub app (bot)
-    resp = requests.post( ("https://api.github.com/app/installations/%s/access_tokens" % app_installation_id),
-                          headers={'Authorization': ('Bearer %s' % app_jwt),
-                                   'Accept': "application/vnd.github.machine-man-preview+json"})
+    resp = requests.post(
+        (
+            "https://api.github.com/app/installations/%s/access_tokens"
+            % app_installation_id
+        ),
+        headers={
+            "Authorization": ("Bearer %s" % app_jwt),
+            "Accept": "application/vnd.github.machine-man-preview+json",
+        },
+    )
     resp_json = resp.json()
     try:
         new_token = resp_json.get("token")
     except:
         raise Exception("Installation token not found in JSON response!")
     return new_token
+
 
 def log_request_payloads(request):
     # Report all forms of request payload
@@ -370,9 +429,10 @@ def log_request_payloads(request):
     try:
         log.debug(request.json)
     except json.decoder.JSONDecodeError:
-        log.debug('No JSON found.')
+        log.debug("No JSON found.")
     except:
-        log.debug('JSON is funky!')
+        log.debug("JSON is funky!")
+
 
 # python3 compatible pretty dates,
 # adapted from https://stackoverflow.com/a/5164027
@@ -380,42 +440,43 @@ def log_request_payloads(request):
 # NB - This assumes an un-adjusted UTC date (ie,
 # disregard locale and daylight savings)
 import datetime
+
+
 def pretty_date(d):
     now = datetime.datetime.now(datetime.timezone.utc)
     diff = now - d
     s = diff.seconds
     days_in_a_year = 365  # close enough!
     days_in_a_month = 30  # close enough!
-    days_in_a_week  =  7  # close enough!
+    days_in_a_week = 7  # close enough!
     if diff.days > (days_in_a_year * 2):
         how_many_years = int(diff.days / days_in_a_year)
         return "{} years ago".format(how_many_years)
     elif diff.days > days_in_a_year:
-        return '1 year ago'
+        return "1 year ago"
     elif diff.days > (days_in_a_month * 2):
         how_many_months = int(diff.days / days_in_a_month)
         return "{} months ago".format(how_many_months)
     elif diff.days > days_in_a_month:
-        return '1 month ago'
+        return "1 month ago"
     elif diff.days > (days_in_a_week * 2):
         how_many_weeks = int(diff.days / days_in_a_week)
         return "{} weeks ago".format(how_many_weeks)
     elif diff.days > days_in_a_week:
-        return '1 week ago'
+        return "1 week ago"
     elif diff.days == 1:
-        return '1 day ago'
+        return "1 day ago"
     elif diff.days > 1:
-        return '{} days ago'.format(diff.days)
+        return "{} days ago".format(diff.days)
     elif s <= 1:
-        return 'just now'
+        return "just now"
     elif s < 60:
-        return '{} seconds ago'.format(s)
+        return "{} seconds ago".format(s)
     elif s < 120:
-        return '1 minute ago'
+        return "1 minute ago"
     elif s < 3600:
-        return '{} minutes ago'.format(s/60)
+        return "{} minutes ago".format(s / 60)
     elif s < 7200:
-        return '1 hour ago'
+        return "1 hour ago"
     else:
-        return '{} hours ago'.format(round(s/3600))
-
+        return "{} hours ago".format(round(s / 3600))
