@@ -5,7 +5,6 @@ from synthetic_tree_viewer.util import (
     get_conf,
     get_domain_banner_text,
     get_domain_banner_hovertext,
-    get_currently_deployed_opentree_branch,
     get_opentree_api_endpoints,
     latest_CrossRef_URL,
     fetch_current_TNRS_context_names,
@@ -17,7 +16,6 @@ import json
 import requests
 from pyramid.httpexceptions import HTTPNotFound, HTTPSeeOther
 from pyramid_retry import RetryableException
-from synthetic_tree_viewer.tree_view_dict_mgr import update_tree_view_dict
 
 try:
     from urllib import unquote_plus
@@ -72,17 +70,9 @@ def home(request):
 )
 @login_required
 def contact(request):
-    view_dict = get_opentree_api_endpoints(request)
-    view_dict.update(
-        {
-            "taxonSearchContextNames": fetch_current_TNRS_context_names(request),
-            "conf": get_conf(request),  # needed for the footer diagnostics
-            "currently_deployed_opentree_branch": get_currently_deployed_opentree_branch(
-                request
-            ),
-        }
-    )
-    # add_local_comments_markup(request, view_dict)
+    view_dict = get_copy_of_view_dict(request)
+    aes = get_opentree_api_endpoints(request)
+    view_dict.update(aes)
     return view_dict
 
 
@@ -222,7 +212,6 @@ def tree_view(request):
     path_parts = full_path.split("/")
     rset = request.registry.settings
     etvd = rset["extra_tree_view_dict"]
-    update_tree_view_dict(rset, etvd)
     view_dict = dict(etvd)
     try:
         tree_version, startingNodeID = fetch_current_synthetic_tree_ids(request)

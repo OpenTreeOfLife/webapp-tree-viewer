@@ -2,10 +2,9 @@ from pyramid.view import view_config
 from synthetic_tree_viewer.util import (
     get_user_display_name,
     get_auth_user,
-    get_conf,
+    get_copy_of_view_dict,
     get_domain_banner_text,
     get_domain_banner_hovertext,
-    get_currently_deployed_opentree_branch,
     get_opentree_api_endpoints,
     latest_CrossRef_URL,
     fetch_current_TNRS_context_names,
@@ -55,24 +54,9 @@ ot_cleaner = Cleaner(tags=ot_markdown_tags, attributes=ot_markdown_attributes)
 
 def _minimal_about_viewdict(request):
     # First, copy our boilerplate config vars (getDraftTreeID_url, etc)
-    view_dict = get_opentree_api_endpoints(request)
-    # add_local_comments_markup(request, view_dict)
-
-    # Then add/override with these explicit key-value pairs
-    view_dict.update(
-        {
-            # NB - Duplicate keys will be resolved in favor of the values below!
-            "conf": get_conf(request),  # needed for the footer diagnostics
-            "currently_deployed_opentree_branch": get_currently_deployed_opentree_branch(
-                request
-            ),
-            "response": request.response,
-            "registry": request.registry,
-            "taxonSearchContextNames": fetch_current_TNRS_context_names(request),
-            "domain_banner_text": get_domain_banner_text(request),
-            "domain_banner_hovertext": get_domain_banner_hovertext(request),
-        }
-    )
+    view_dict = get_copy_of_view_dict(request)
+    aepd = get_opentree_api_endpoints(request)
+    view_dict.update(aepd)
 
     if request.params.get("parentWindowURL", None):
         plain_feedback_url = unquote_plus(request.params.get("parentWindowURL"))

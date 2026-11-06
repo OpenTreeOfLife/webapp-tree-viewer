@@ -32,58 +32,24 @@ def get_github_client_secret():
         raise Exception(err_msg)
 
 
+def get_copy_of_view_dict(request):
+    reg = request.registry
+    view_dict = dict(reg.settings["extra_tree_view_dict"])
+    # add_local_comments_markup(request, view_dict)
+
+    view_dict.update(
+        {
+            "response": request.response,
+            "registry": reg,
+            "conf": get_conf(request),
+        }
+    )
+    return view_dict
+
+
 def get_conf(request):
-    # get app-specific settings (e.g. API URLs)
-    global _CONFIG_REGISTRY
-
-    app_name = request.registry.package_name
-    if _CONFIG_REGISTRY.get(app_name) is None:
-        from configparser import ConfigParser
-
-        # ignore interpolation % markers in logging formatters!
-        conf = ConfigParser(interpolation=None)
-        # DON'T convert property names to lower-case!
-        conf.optionxform = str
-        # Our monolithic app-config file includes its own absolute filesystem path;
-        # use this to parse and load API endpoints, etc.
-        test_config_path = request.registry.settings.get("path_to_app_config", "")
-        config_file_found = None
-        more_info = None
-        try:
-            prior2_path_exists = os.path.exists("/home/deploy/configs")
-            prior_path_exists = os.path.exists(
-                "/home/deploy/configs/synthetic_tree_viewer"
-            )
-            exact_path_exists = os.path.exists(
-                "/home/deploy/configs/synthetic_tree_viewer/treeview_app_config.ini"
-            )
-            exact_path_is_file = os.path.isfile(
-                "/home/deploy/configs/synthetic_tree_viewer/treeview_app_config.ini"
-            )
-            path_exists = os.path.exists(test_config_path)
-            path_is_file = os.path.isfile(test_config_path)
-            if os.path.isfile(test_config_path):
-                config_file_found = test_config_path
-                conf.read(test_config_path)
-            assert "apis" in conf.sections()
-            _CONFIG_REGISTRY[app_name] = conf
-        except:
-            print("\n=== WEB-APP CONFIG NOT FOUND, INVALID, OR INCOMPLETE ===")
-            if config_file_found is None:
-                import pwd
-
-                pw_name = pwd.getpwuid(os.geteuid()).pw_name
-                err_msg = f"Webapp config not found (as user {pw_name})! Expecting it in this location:\n  {test_config_path}"
-                raise Exception(err_msg)
-            err_msg = "Webapp config file ({}) is broken or incomplete (missing [apis] section)".format(
-                config_file_found
-            )
-            print(err_msg)
-            log.debug(err_msg)
-            raise Exception(err_msg)
-        # add our GitHub client secret from a separate file (kept out of source repo)
-        conf.set("apis", "github_client_secret", get_github_client_secret())
-    return _CONFIG_REGISTRY.get(app_name)
+    c = request.registry.settings.get("extra_tree_view_dict", {}).get("conf", {})
+    return c
 
 
 def get_domain_banner_text(subdomain):
@@ -255,7 +221,7 @@ def fetch_current_TNRS_context_names(rset):
         return _curr_context_names
     except Exception as e:
         # throw 403 or 500 or just leave it
-        return "ERROR", e.message
+        return "ERROR", str(e)
 
 
 def unique_ordered_list(seq):

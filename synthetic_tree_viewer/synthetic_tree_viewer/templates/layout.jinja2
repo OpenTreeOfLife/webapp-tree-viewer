@@ -568,7 +568,7 @@
             {% for sec in ('apis', 'api_base_urls', 'api_endpoints'): %}
               {% if sec != 'DEFAULT': %}
                <dt>{{ sec }}</dt>
-                 {% for name, value in conf[sec].items(): %}
+                 {% for name, value in conf.get(sec,{}).items(): %}
                    <dd><strong style="color: #888;">{{ name }}</strong>: {{ value }}</dd>
                  {% endfor %}
               {% endif %}

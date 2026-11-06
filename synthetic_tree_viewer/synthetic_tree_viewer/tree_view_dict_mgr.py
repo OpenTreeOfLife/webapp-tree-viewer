@@ -4,6 +4,9 @@ from synthetic_tree_viewer.util import (
     get_domain_banner_text,
     get_domain_banner_hovertext,
 )
+import logging
+
+_LOG = logging.getLogger(__name__)
 
 
 def create_tree_view_dict(rset):
@@ -11,9 +14,61 @@ def create_tree_view_dict(rset):
     subdomain = rset.get("opentree.subdomain", "devtree")
     dbt = get_domain_banner_text(subdomain)
     dbht = get_domain_banner_hovertext(subdomain)
+    # ctns = fetch_current_TNRS_context_names(rset)
+    # TEMP, hard-coded
+    _LOG.warn("Currently hard-coding TNRS contexts")
+    ctns = [
+        "All life",
+        "Land plants",
+        "Hornworts",
+        "Mosses",
+        "Liverworts",
+        "Vascular plants",
+        "Club mosses",
+        "Ferns",
+        "Seed plants",
+        "Flowering plants",
+        "Monocots",
+        "Eudicots",
+        "Rosids",
+        "Asterids",
+        "Asterales",
+        "Asteraceae",
+        "Aster",
+        "Symphyotrichum",
+        "Campanulaceae",
+        "Lobelia",
+        "Animals",
+        "Birds",
+        "Tetrapods",
+        "Mammals",
+        "Amphibians",
+        "Vertebrates",
+        "Arthropods",
+        "Molluscs",
+        "Nematodes",
+        "Platyhelminthes",
+        "Annelids",
+        "Cnidarians",
+        "Arachnids",
+        "Insects",
+        "Fungi",
+        "Basidiomycetes",
+        "Ascomycetes",
+        "Bacteria",
+        "SAR group",
+        "Archaea",
+        "Excavata",
+        "Amoebozoa",
+        "Centrohelida",
+        "Haptophyta",
+        "Apusozoa",
+        "Diatoms",
+        "Ciliates",
+        "Forams",
+    ]
     tvd = {
         # NB - Duplicate keys will be resolved in favor of the values below!
-        # "conf": get_conf(request),  # needed for the footer diagnostics
         "project_name": "synthetic tree viewer",
         #'session': request.session,
         # "response": request.response,
@@ -23,7 +78,7 @@ def create_tree_view_dict(rset):
         "nodeID": "",
         "nodeName": "",
         "viewport": "",
-        "taxonSearchContextNames": None,
+        "taxonSearchContextNames": ctns,
         "nudgingToLatestSyntheticTree": False,
         "forcedByURL": False,
         "incomingDomSource": "none",
@@ -31,13 +86,4 @@ def create_tree_view_dict(rset):
         "domain_banner_hovertext": dbht,
     }
     rset["extra_tree_view_dict"] = tvd
-    return tvd
-
-
-def update_tree_view_dict(rset, tvd):
-    """Updates tvd if some of the online values are unset."""
-    key = "taxonSearchContextNames"
-    val = tvd.get(key)
-    if val is None:
-        tvd[key] = fetch_current_TNRS_context_names(rset)
     return tvd

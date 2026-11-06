@@ -12,6 +12,31 @@ log = logging.getLogger(__name__)
 my_session_factory = SignedCookieSessionFactory("secret sauce")
 
 
+def create_api_base_urls(rset):
+    # mimic of old web2py conf dicts for the sake of
+    #   moving jinja templates over
+    try:
+        default_apis = rset["api_base_urls.default_apis"]
+        production_apis = rset["api_base_urls.production_apis"]
+    except KeyError:
+        raise RuntimeError(
+            "api_base_urls.default_apis and api_base_urls.production_apis must be found in ini file."
+        )
+    cached_default_apis = f"{default_apis}/cached"
+    cached_production_apis = f"{production_apis}/cached"
+    def_curator = "https://tree.opentreeoflife.org/curator"
+    cwu = rset.get("opentree.curation_webapp_url", def_curator)
+
+    abus = {
+        "default_apis": default_apis,
+        "production_apis": production_apis,
+        "curation_production_webapp_url": cwu,
+        "CACHED_default_apis": cached_default_apis,
+        "CACHED_production_apis": cached_production_apis,
+    }
+    return abus
+
+
 def create_api_endpoints(rset):
     # @TODO implement scheme relative URLs? not done here
     #   MTH stripped out that logic because I think it is an old
@@ -43,6 +68,9 @@ def create_api_endpoints(rset):
     aeps["singlePropertySearchForTrees_url"] = (
         f"{production_apis}/v3/studies/find_trees"
     )
+    subd = rset.get("opentree.subdomain", "devtree")
+    aeps["taxo_browser_tree_server"] = f"https://{subd}.opentreeoflife.org"
+    aeps["taxo_browser_api_server"] = production_apis
     aeps["getTaxonInfo_url"] = f"{default_apis}/v3/taxonomy/taxon_info"
     rset["api_endpoints"] = aeps
     return aeps
@@ -60,9 +88,16 @@ def main(global_config, **settings):
         config.include(".routes")
         config.scan()
         rset = config.registry.settings
+        abus = create_api_base_urls(rset)
         aeps = create_api_endpoints(rset)
         tvd = create_tree_view_dict(rset)
         tvd.update(aeps)
+        old_conf = {
+            "api_base_urls": abus,
+            "api_endpoints": aeps,
+        }
+        assert "conf" not in tvd
+        tvd["conf"] = old_conf
 
         # rset["path_to_app_config_sp"] = rset["path_to_app_config"].split()
     log.debug("Configured. Calling make_wsgi_app...")
