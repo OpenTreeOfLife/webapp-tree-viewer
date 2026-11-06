@@ -14,7 +14,7 @@ import requests
 import logging
 
 log = logging.getLogger(__name__)
-
+_LOG = log
 
 # hold persistent config object(s)
 _CONFIG_REGISTRY = {}
@@ -283,7 +283,7 @@ def unique_ordered_list(seq):
 
 
 treebase_deposit_doi = re.compile(
-    "//purl.org/phylo/treebase/phylows/study/TB2:S(?P<treebase_id>\d+)"
+    r"//purl.org/phylo/treebase/phylows/study/TB2:S(?P<treebase_id>\d+)"
 )
 
 
