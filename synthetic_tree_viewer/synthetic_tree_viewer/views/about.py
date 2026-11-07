@@ -120,7 +120,13 @@ def bibliographic_references(request):
     return view_dict
 
 
+_contributing_studies = None
+
+
 def fetch_current_synthesis_source_data(request):
+    global _contributing_studies
+    if _contributing_studies is not None:
+        return _contributing_studies
     json_headers = {
         "content-type": "application/json",
         "accept": "application/json",
@@ -214,8 +220,8 @@ def fetch_current_synthesis_source_data(request):
                     raw_deposit_doi
                 )
 
-        return contributing_studies
-
+        _contributing_studies = contributing_studies
+        return _contributing_studies
     except Exception as e:
         # throw 403 or 500 or just leave it
         return "ERROR", e

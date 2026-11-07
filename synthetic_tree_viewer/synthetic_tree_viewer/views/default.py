@@ -2,6 +2,7 @@ from pyramid.view import view_config
 from synthetic_tree_viewer.util import (
     get_user_display_name,
     get_auth_user,
+    get_copy_of_view_dict,
     get_conf,
     get_domain_banner_text,
     get_domain_banner_hovertext,
@@ -210,9 +211,7 @@ def login(request):
 def tree_view(request):
     full_path = request.matchdict["full_path"]
     path_parts = full_path.split("/")
-    rset = request.registry.settings
-    etvd = rset["extra_tree_view_dict"]
-    view_dict = dict(etvd)
+    view_dict = get_copy_of_view_dict(request)
     try:
         tree_version, startingNodeID = fetch_current_synthetic_tree_ids(request)
     except Exception as e:

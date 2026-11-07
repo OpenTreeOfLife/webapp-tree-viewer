@@ -24,8 +24,7 @@ def create_api_base_urls(rset):
         )
     cached_default_apis = f"{default_apis}/cached"
     cached_production_apis = f"{production_apis}/cached"
-    def_curator = "https://tree.opentreeoflife.org/curator"
-    cwu = rset.get("opentree.curation_webapp_url", def_curator)
+    cwu = rset["opentree.curation_webapp_url"]
 
     abus = {
         "default_apis": default_apis,
@@ -68,6 +67,8 @@ def create_api_endpoints(rset):
     aeps["singlePropertySearchForTrees_url"] = (
         f"{production_apis}/v3/studies/find_trees"
     )
+    aeps["API_load_study_GET_url"] = f"{production_apis}/v3/study/" + "{STUDY_ID}"
+
     subd = rset.get("opentree.subdomain", "devtree")
     aeps["taxo_browser_tree_server"] = f"https://{subd}.opentreeoflife.org"
     aeps["taxo_browser_api_server"] = production_apis

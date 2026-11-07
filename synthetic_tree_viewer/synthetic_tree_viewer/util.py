@@ -34,7 +34,8 @@ def get_github_client_secret():
 
 def get_copy_of_view_dict(request):
     reg = request.registry
-    view_dict = dict(reg.settings["extra_tree_view_dict"])
+    settings = reg.settings
+    view_dict = dict(settings["extra_tree_view_dict"])
     # add_local_comments_markup(request, view_dict)
 
     view_dict.update(
@@ -42,6 +43,7 @@ def get_copy_of_view_dict(request):
             "response": request.response,
             "registry": reg,
             "conf": get_conf(request),
+            "curation_webapp_url": settings["opentree.curation_webapp_url"],
         }
     )
     return view_dict
