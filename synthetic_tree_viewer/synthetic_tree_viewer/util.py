@@ -1,17 +1,15 @@
-import os
-import re
-import configparser
+import datetime
 import functools
 import json
-from pyramid.request import Request
+import logging
+import os
+import re
+
+import requests
 from pyramid.httpexceptions import (
-    HTTPNotFound,
     HTTPSeeOther,
 )
-import datetime
-import requests
-
-import logging
+from pyramid.request import Request
 
 log = logging.getLogger(__name__)
 _LOG = log
@@ -27,7 +25,7 @@ def get_github_client_secret():
         return GITHUB_CLIENT_SECRET
     else:
         abs_path = os.path.abspath(client_secret_path)
-        err_msg = "Client secret file ({}) not found!".format(abs_path)
+        err_msg = f"Client secret file ({abs_path}) not found!"
         print(err_msg)
         raise Exception(err_msg)
 
@@ -365,7 +363,10 @@ def fetch_github_app_auth_token(request):
     # TODO: include 'repository_ids' "feedback" (?)
 
     # build a new JWT, since they expire
-    import python_jwt as jwt, jwcrypto.jwk as jwk, datetime, requests
+    import datetime
+
+    import python_jwt as jwt
+    from jwcrypto import jwk
 
     # key = jwk.JWK.generate(kty='RSA', size=2048)
     conf = get_conf(request)
@@ -446,7 +447,7 @@ def log_request_payloads(request):
 
 
 def pretty_date(d):
-    now = datetime.datetime.now(datetime.timezone.utc)
+    now = datetime.datetime.now(datetime.UTC)
     diff = now - d
     days_in_a_year = 365  # close enough!
     days_in_a_month = 30  # close enough!

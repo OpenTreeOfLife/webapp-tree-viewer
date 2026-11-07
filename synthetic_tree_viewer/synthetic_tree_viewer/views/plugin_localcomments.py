@@ -3,35 +3,31 @@ import logging
 
 log = logging.getLogger(__name__)
 
+import json
 import re
+from datetime import datetime
+from pprint import pprint
+
+import bleach
+import pytz  # explicit time-zone support
+import requests
+from bleach.sanitizer import Cleaner
 
 # from gluon.contrib.markdown.markdown2 import markdown
 from markdown import markdown
-
+from pyramid.events import subscriber
+from pyramid.httpexceptions import HTTPNotFound
+from pyramid.renderers import render_to_response
 from pyramid.view import view_config
-import requests
-import os.path
-import urllib
-import bleach
-from bleach.sanitizer import Cleaner
-import pytz  # explicit time-zone support
-from datetime import datetime
-import json
-import synthetic_tree_viewer.util
+from pyramid_retry import IBeforeRetry
 
 from synthetic_tree_viewer.util import (
     fetch_github_app_auth_token,
-    user_is_logged_in,
-    log_request_payloads,
     get_auth_user,
+    log_request_payloads,
     pretty_date,
+    user_is_logged_in,
 )
-from pprint import pprint
-
-from pyramid.events import subscriber
-from pyramid.renderers import render_to_response
-from pyramid_retry import IBeforeRetry
-from pyramid.httpexceptions import HTTPNotFound
 
 # these headers are set once request is available
 GH_GET_HEADERS = None
@@ -40,13 +36,13 @@ GH_POST_HEADERS = None
 
 @subscriber(IBeforeRetry)
 def retry_event(event):
-    log.debug("@@@@@ retry_event! event.exception: {}".format(type(event.exception)))
-    log.debug("@@@@@ retry_event! event.response: {}".format(event.response))
+    log.debug(f"@@@@@ retry_event! event.exception: {type(event.exception)}")
+    log.debug(f"@@@@@ retry_event! event.response: {event.response}")
     # print(f'A retry is about to occur due to {event.exception}.')
 
 
 def error(msg="404 not found"):
-    log.debug("@@@@@ raising 404 error: {}".format(msg))
+    log.debug(f"@@@@@ raising 404 error: {msg}")
     raise HTTPNotFound(body=msg)
 
 
@@ -65,7 +61,7 @@ def show_type_icon(in_type):
         iconClass = "icon-wrench"
     elif in_type == "Reply or general":
         iconClass = "icon-comment"
-    icon_markup = '<i class="{}"></i>'.format(iconClass)
+    icon_markup = f'<i class="{iconClass}"></i>'
     return icon_markup
 
 
@@ -149,9 +145,7 @@ def index(request):
                     import sys
 
                     sys.stderr.write(
-                        "Error: got a {c} from {u}\n".format(
-                            c=resp.status_code, u=get_children_url
-                        )
+                        f"Error: got a {resp.status_code} from {get_children_url}\n"
                     )
                 except:
                     pass  # well that sucks, we failed to even write to stderr
@@ -298,12 +292,12 @@ def index(request):
         # delete the specified comment or close an issue...
         try:
             if issue_or_comment == "issue":
-                print("CLOSING ISSUE {0}".format(comment_id))
+                print(f"CLOSING ISSUE {comment_id}")
                 close_issue(comment_id)
                 clear_local_comments(request)
                 return "closed"
             else:
-                print("DELETING COMMENT {0}".format(comment_id))
+                print(f"DELETING COMMENT {comment_id}")
                 delete_comment(comment_id)
                 clear_local_comments(request)
                 return "deleted"
@@ -331,13 +325,13 @@ def index(request):
                 auth_user["display_name"], auth_user["github_profile_url"]
             )
         elif visitor_name and visitor_email:
-            author_link = "[{0}](mailto:{1})".format(visitor_name, visitor_email)
+            author_link = f"[{visitor_name}](mailto:{visitor_email})"
         elif visitor_name:
             # no email provided
             author_link = visitor_name
         elif visitor_email:
             # no name provided
-            author_link = "[{0}](mailto:{1})".format(visitor_email, visitor_email)
+            author_link = f"[{visitor_email}](mailto:{visitor_email})"
         else:
             # no identifying information provided
             author_link = "Anonymous"
@@ -345,13 +339,13 @@ def index(request):
         if thread_parent_id == "0":
             # create a new issue (thread starter)
             msg_body = request.POST.get("body", "")
-            if len(re.compile("\s+").sub("", msg_body)) < 1:
+            if len(re.compile(r"\s+").sub("", msg_body)) < 1:
                 return ""
 
             # more useful links for some footer fields
             if url.startswith("http"):
                 # repeat full (absolute) URL as link text
-                url_link = "[{0}]({1})".format(url, url)
+                url_link = f"[{url}]({url})"
             else:
                 # expand hidden link for root-relative URL
                 url_link = "[{0}]({1}{2})".format(
@@ -376,7 +370,7 @@ def index(request):
 
             msg_data = {
                 "title": issue_title,
-                "body": "{0}\n{1}".format(msg_body, footer),
+                "body": f"{msg_body}\n{footer}",
                 "labels": [],
             }
             if feedback_type:
@@ -387,7 +381,7 @@ def index(request):
             # attach this comment to an existing issue
             ##print("ADD A COMMENT")
             msg_body = request.POST.get("body", "")
-            if len(re.compile("\s+").sub("", msg_body)) < 1:
+            if len(re.compile(r"\s+").sub("", msg_body)) < 1:
                 return ""
             # add abbreviated metadata for a comment
             footer = build_comment_metadata_footer(
@@ -397,7 +391,7 @@ def index(request):
                     "Upvotes": 0,
                 },
             )
-            msg_data = {"body": "{0}\n{1}".format(msg_body, footer)}
+            msg_data = {"body": f"{msg_body}\n{footer}"}
             new_msg = add_or_update_comment(msg_data, parent_issue_id=thread_parent_id)
         clear_local_comments(request)
 
@@ -430,9 +424,7 @@ def index(request):
         comments = get_local_comments(request, {"Open Tree Taxonomy id": ottol_id})
     else:  # fall back to url
         log.debug(
-            ">>> no match for filter '{}'... using default comment filter (url?): ".format(
-                filter
-            )
+            f">>> no match for filter '{filter}'... using default comment filter (url?): "
         )
         if "parentWindowURL=" in url:
             # pprint("=== EXTRACTING parentWindowURL...")
@@ -468,9 +460,7 @@ def index(request):
                     import sys
 
                     sys.stderr.write(
-                        "Error: got a {c} from {u}\n".format(
-                            c=resp.status_code, u=get_children_url
-                        )
+                        f"Error: got a {resp.status_code} from {get_children_url}\n"
                     )
                 except:
                     pass  # well that sucks, we failed to even write to stderr
@@ -598,15 +588,13 @@ def add_or_update_comment(msg_data, comment_id=None, parent_issue_id=None):
     # comment on an existing issue via the GitHub API
     if comment_id:
         # edit an existing comment
-        url = "{0}/repos/OpenTreeOfLife/feedback/issues/comments/{1}".format(
-            GH_BASE_URL, comment_id
+        url = (
+            f"{GH_BASE_URL}/repos/OpenTreeOfLife/feedback/issues/comments/{comment_id}"
         )
         resp = requests.patch(url, headers=GH_POST_HEADERS, data=json.dumps(msg_data))
     else:
         # create a new comment
-        url = "{0}/repos/OpenTreeOfLife/feedback/issues/{1}/comments".format(
-            GH_BASE_URL, parent_issue_id
-        )
+        url = f"{GH_BASE_URL}/repos/OpenTreeOfLife/feedback/issues/{parent_issue_id}/comments"
         resp = requests.post(url, headers=GH_POST_HEADERS, data=json.dumps(msg_data))
     resp.raise_for_status()
     try:
@@ -618,7 +606,7 @@ def add_or_update_comment(msg_data, comment_id=None, parent_issue_id=None):
 
 def close_issue(issue_id):
     # close a thread (issue) on GitHub
-    url = "{0}/repos/OpenTreeOfLife/feedback/issues/{1}".format(GH_BASE_URL, issue_id)
+    url = f"{GH_BASE_URL}/repos/OpenTreeOfLife/feedback/issues/{issue_id}"
     resp = requests.patch(
         url, headers=GH_POST_HEADERS, data=json.dumps({"state": "closed"})
     )
@@ -632,9 +620,7 @@ def close_issue(issue_id):
 
 def delete_comment(comment_id):
     # delete a comment on GitHub
-    url = "{0}/repos/OpenTreeOfLife/feedback/issues/comments/{1}".format(
-        GH_BASE_URL, comment_id
-    )
+    url = f"{GH_BASE_URL}/repos/OpenTreeOfLife/feedback/issues/comments/{comment_id}"
     resp = requests.delete(url, headers=GH_GET_HEADERS)
     resp.raise_for_status()
     try:
@@ -689,7 +675,7 @@ def get_local_comments(request, location={}):
     print(build_localcomments_key(request))
     search_text = ""
     for k, v in location.items():
-        search_text = '{0}"{1} | {2} " '.format(search_text, k, v)
+        search_text = f'{search_text}"{k} | {v} " '
     print("RAW search_text:")
     print(search_text)
     try:
@@ -714,7 +700,7 @@ def get_local_comments(request, location={}):
         print(resp)
         resp.raise_for_status()
     except:
-        print("call to {u} failed. Returning empty comments list".format(u=url))
+        print(f"call to {url} failed. Returning empty comments list")
         return []
     try:
         results = resp.json()
@@ -951,7 +937,7 @@ def get_visible_comment_body(comment_body):
 # Time-zone converstion from UTC to local time (needed for GitHub date-strings),
 # adapted from code found here: http://stackoverflow.com/a/13287083
 import calendar
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 
 def utc_to_local(utc_dt):

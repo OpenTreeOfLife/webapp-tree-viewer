@@ -1,22 +1,13 @@
-from pyramid.view import view_config
-from synthetic_tree_viewer.util import (
-    get_user_display_name,
-    get_auth_user,
-    get_copy_of_view_dict,
-    get_conf,
-    get_domain_banner_text,
-    get_domain_banner_hovertext,
-    get_opentree_api_endpoints,
-    latest_CrossRef_URL,
-    AUTH_CONFIG,
-    login_required,
-    get_copy_of_view_dict,
-)
-from synthetic_tree_viewer import fetch_current_synthetic_tree_ids
-import json
-import requests
 from pyramid.httpexceptions import HTTPNotFound, HTTPSeeOther
-from pyramid_retry import RetryableException
+from pyramid.view import view_config
+
+from synthetic_tree_viewer import fetch_current_synthetic_tree_ids
+from synthetic_tree_viewer.util import (
+    AUTH_CONFIG,
+    get_copy_of_view_dict,
+    get_opentree_api_endpoints,
+    login_required,
+)
 
 try:
     from urllib import unquote_plus
@@ -191,7 +182,6 @@ def login(request):
         )
         # request.make_body_seekable()
         # raise RetryableException
-        pass
     else:
         ## no login_result yet; bail and wait for this
         log.debug(
@@ -199,7 +189,6 @@ def login(request):
         )
         # request.make_body_seekable()
         # raise RetryableException
-        pass
 
     request.response.text = "...still waiting..."
     return request.response

@@ -1,25 +1,22 @@
-from pyramid.view import view_config
-from synthetic_tree_viewer.util import (
-    get_user_display_name,
-    get_auth_user,
-    get_copy_of_view_dict,
-    get_domain_banner_text,
-    get_domain_banner_hovertext,
-    get_opentree_api_endpoints,
-    latest_CrossRef_URL,
-    get_data_deposit_message,
-)
+import json
+from datetime import datetime
+from urllib.parse import quote
+
+import bleach
+import markdown
+import requests
+from bleach.sanitizer import Cleaner
 from pyramid.httpexceptions import (
-    HTTPNotFound,
     HTTPSeeOther,
 )
-from urllib.parse import quote
-import requests
-import json
-import markdown
-from datetime import datetime
-import bleach
-from bleach.sanitizer import Cleaner
+from pyramid.view import view_config
+
+from synthetic_tree_viewer.util import (
+    get_copy_of_view_dict,
+    get_data_deposit_message,
+    get_opentree_api_endpoints,
+    latest_CrossRef_URL,
+)
 
 # Define a consistent cleaner to sanitize user input. We need a few
 # elements that are common in our markdown but missing from the Bleach
@@ -68,7 +65,6 @@ def _minimal_about_viewdict(request):
 
 @view_config(route_name="favicon")
 def favicon_view(request):
-    import os
     from pyramid.response import Response
 
     favicon_path = "./synthetic_tree_viewer/static/favicon.ico"
@@ -163,7 +159,7 @@ def fetch_current_synthesis_source_data(request):
             commit_SHA_in_synthesis = source_details.get("git_sha")
             # N.B. assume that any listed study has been used!
 
-            if study_id in contributing_study_info.keys():
+            if study_id in contributing_study_info:
                 contributing_study_info[study_id]["tree_ids"].append(tree_id)
             else:
                 contributing_study_info[study_id] = {
@@ -196,7 +192,7 @@ def fetch_current_synthesis_source_data(request):
                 prefixed_study_id = "pg_%s" % study["ot:studyId"]
             else:
                 prefixed_study_id = study["ot:studyId"]
-            if prefixed_study_id in contributing_study_info.keys():
+            if prefixed_study_id in contributing_study_info:
                 contrib_info = contributing_study_info[prefixed_study_id]
                 # and commit SHA to support retrieval of *exact* Nexson from synthesis
                 study["commit_SHA_in_synthesis"] = contrib_info[
@@ -269,6 +265,7 @@ def progress(request):
 
         # use a recurrence rule to find starting dates for each month for which we have data
         import re
+
         from dateutil import rrule
 
         def string2date(s):
@@ -360,11 +357,7 @@ def progress(request):
             synth_ott_version = synth_ott_version.split("draft")[0]
             ott_synth_version_info = get_ott_version_info(synth_ott_version)
             if ott_synth_version_info is None:
-                warnings.add(
-                    "specified version {v} of OTT not found!".format(
-                        v=synth_ott_version
-                    )
-                )
+                warnings.add(f"specified version {synth_ott_version} of OTT not found!")
         else:
             if synth_v:
                 # this should have specified an OTT version
@@ -376,9 +369,7 @@ def progress(request):
                 pass
             ott_synth_version_info = get_latest_ott_version_info_by_date(date)
             if ott_synth_version_info is None:
-                warnings.add(
-                    "No version of OTT found on-or-before date {d}!".format(d=date)
-                )
+                warnings.add(f"No version of OTT found on-or-before date {date}!")
 
         if ott_synth_version_info is None:
             ott_synth_version_info = {}
@@ -424,13 +415,13 @@ def progress(request):
         # print( date, (synth.get(date, None) and "true" or "false") )
         has_synthesis_release = synth.get(date, None) and True or False
         synth_version_released_today = (
-            has_synthesis_release and synth.get(date).get("version") or str("")
+            has_synthesis_release and synth.get(date).get("version") or ""
         )
         date_has_taxonomy = ott_new_version_info and True or False
         date_has_phylesystem = phylesystem.get(date, None) and True or False
         # why are these values added as strings, vs. boolean above?
         ott_version_released_today = (
-            ott_new_version_info and ott_new_version_info.get("version", "") or str("")
+            ott_new_version_info and ott_new_version_info.get("version", "") or ""
         )
         ott_version_used_in_synth = ott_synth_version_info.get("version", "")
         by_date[date] = {
@@ -451,7 +442,7 @@ def progress(request):
     # sort by date (allowing for different date formats)
     # dk = [(datetime.strptime(i, "%Y-%m-%d"), i) for i in by_date.keys() if i]
     dk = []
-    for i in by_date.keys():
+    for i in by_date:
         if i:
             # remove any time (intra-day) component for uniform dates!
             # EXAMPLE u'2015-01-16T23Z' ==> u'2015-01-16'
@@ -478,27 +469,27 @@ stats_folder = "./synthetic_tree_viewer/static/statistics"
 
 def fetch_local_synthesis_stats():
     # stats_folder = request.static_url('synthetic_tree_viewer:static/statistics')
-    file_path = "{f}/synthesis.json".format(f=stats_folder)
+    file_path = f"{stats_folder}/synthesis.json"
     try:
         stats = open(file_path).read().strip()
         return stats
-    except Exception as e:
+    except Exception:
         return None
 
 
 def fetch_local_phylesystem_stats():
     # stats_folder = request.static_url('synthetic_tree_viewer:static/statistics')
-    file_path = "{f}/phylesystem.json".format(f=stats_folder)
+    file_path = f"{stats_folder}/phylesystem.json"
     try:
         stats = open(file_path).read().strip()
         return stats
-    except Exception as e:
+    except Exception:
         return None
 
 
 def fetch_local_ott_stats():
     # stats_folder = request.static_url('synthetic_tree_viewer:static/statistics')
-    file_path = "{f}/ott.json".format(f=stats_folder)
+    file_path = f"{stats_folder}/ott.json"
     try:
         stats = open(file_path).read().strip()
         return stats
@@ -592,18 +583,14 @@ def synthesis_release(request):
     if synth_release_version == "":
         release_date = sorted(synth.keys(), reverse=False)[-1]
         release_version = synth[release_date].get("version")
-        raise HTTPSeeOther(
-            location="/about/synthesis-release/{v}".format(v=release_version)
-        )
+        raise HTTPSeeOther(location=f"/about/synthesis-release/{release_version}")
 
     # Still here? Let's grab the version from URL
     view_dict["release_version"] = synth_release_version
     view_dict["synthesis_stats"] = synth
 
     # fetch and render Markdown release notes as HTML
-    fetch_url = "https://raw.githubusercontent.com/OpenTreeOfLife/germinator/master/doc/ot-synthesis-{v}.md".format(
-        v=synth_release_version
-    )
+    fetch_url = f"https://raw.githubusercontent.com/OpenTreeOfLife/germinator/master/doc/ot-synthesis-{synth_release_version}.md"
     try:
         version_notes_response = requests.get(url=fetch_url).text
         # N.B. We assume here that any hyperlinks have the usual Markdown braces!
@@ -641,18 +628,14 @@ def taxonomy_version(request):
         sorted_ott = sorted(ott, key=lambda v: v["date"], reverse=False)
         taxonomy_version = sorted_ott[-1].get("version")
         # bounce to the latest version by default
-        raise HTTPSeeOther(
-            location="/about/taxonomy-version/{v}".format(v=taxonomy_version)
-        )
+        raise HTTPSeeOther(location=f"/about/taxonomy-version/{taxonomy_version}")
 
     # Still here? Let's grab the version from URL
     view_dict["taxonomy_version"] = taxo_version
     view_dict["taxonomy_stats"] = ott
 
     # fetch and render Markdown release notes as HTML
-    fetch_url = "https://raw.githubusercontent.com/OpenTreeOfLife/reference-taxonomy/master/doc/{v}.md".format(
-        v=taxo_version
-    )
+    fetch_url = f"https://raw.githubusercontent.com/OpenTreeOfLife/reference-taxonomy/master/doc/{taxo_version}.md"
     try:
         version_notes_response = requests.get(url=fetch_url).text
         # N.B. We assume here that any hyperlinks have the usual Markdown braces!

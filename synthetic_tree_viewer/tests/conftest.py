@@ -1,9 +1,10 @@
 import os
+
+import pytest
+import webtest
 from pyramid.paster import get_appsettings
 from pyramid.scripting import prepare
 from pyramid.testing import DummyRequest, testConfig
-import pytest
-import webtest
 
 from synthetic_tree_viewer import main
 

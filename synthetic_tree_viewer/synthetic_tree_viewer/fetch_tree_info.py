@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-import requests
-import logging
 import json
+import logging
+
+import requests
+
 from .util import get_opentree_api_endpoints
 
 log = logging.getLogger(__name__)

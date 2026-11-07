@@ -1,4 +1,5 @@
 from pyramid.view import notfound_view_config
+
 from synthetic_tree_viewer.util import get_copy_of_view_dict
 
 

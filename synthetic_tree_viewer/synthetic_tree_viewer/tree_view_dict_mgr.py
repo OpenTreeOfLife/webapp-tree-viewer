@@ -1,10 +1,11 @@
+import logging
+
 from synthetic_tree_viewer.util import (
     fetch_current_TNRS_context_names,
     get_currently_deployed_opentree_branch,
-    get_domain_banner_text,
     get_domain_banner_hovertext,
+    get_domain_banner_text,
 )
-import logging
 
 _LOG = logging.getLogger(__name__)
 

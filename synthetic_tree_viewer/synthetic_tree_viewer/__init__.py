@@ -1,9 +1,11 @@
+import logging
+
 from pyramid.config import Configurator
 
 # Use Pyramid's default cookie session implementation
 # see <https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/sessions.html#using-the-default-session-factory>
 from pyramid.session import SignedCookieSessionFactory
-import logging
+
 from .fetch_tree_info import fetch_current_synthetic_tree_ids
 from .tree_view_dict_mgr import create_tree_view_dict
 
