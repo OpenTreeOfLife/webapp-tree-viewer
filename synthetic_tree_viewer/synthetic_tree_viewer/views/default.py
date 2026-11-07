@@ -207,11 +207,14 @@ def tree_view(request):
         # throw 403 or 500 or just leave it
         tree_version, startingNodeID = "ERROR", str(e)
     # Then add/override with these explicit key-value pairs
+    api_base_urls = view_dict["conf"]["api_base_urls"]
+    cpwu = api_base_urls["curation_production_webapp_url"]
     view_dict.update(
         {
             "draftTreeName": tree_version,
             "startingNodeID": startingNodeID,
             "showLegendOnLoad": request.params.get("show-legend") or False,
+            "curation_production_webapp_url": cpwu,
         }
     )
 
