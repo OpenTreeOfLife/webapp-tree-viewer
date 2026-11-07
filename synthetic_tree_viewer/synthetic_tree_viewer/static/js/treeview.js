@@ -70,45 +70,6 @@ function updateTreeView( State ) {
         argus.displayNode({"nodeID": treeNodeID,
                            "ott_id": incomingOttolID,
                            "domSource": syntheticTreeID});  // from main HTML view
-
-        /* NO LONGER NEEDED if ottid always translates to node id as shown above!
-        $.ajax({
-            type: 'POST',
-            url: getNodeIDForOttolID_url,
-            data: {'ottId': String(ottolID)},
-            success: function(data) {
-                argus.displayNode({"nodeID": data,
-                                   "domSource": syntheticTreeID});  // from main HTML view
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                // NOTE that this won't fire in cross-domain requests! using complete (below) instead..
-            },
-            complete: function(jqXHR, textStatus) {
-                // examine the error response and show a sensible message
-                if (textStatus === 'error') {
-                    var errMsg;
-                    if (jqXHR.responseText.indexOf('TaxonNotFoundException') !== -1) {
-                        // the requested OTT taxon is not found in the target tree
-                        var taxobrowserlink = getTaxobrowserLink('taxonomy browser',ottolID)
-                        errMsg = '<span style="font-weight: bold; color: #777;">This taxon is in our taxonomy'
-                                +' but not in our tree synthesis database. This can happen for a variety of reasons,'
-                                +' but the most probable is that is has a taxon flag (e.g. <em>incertae sedis</em>) that'
-                                +' causes it to be pruned from the synthetic tree. See the '
-                                +taxobrowserlink
-                                +' for more information about this taxon.'
-                                +'<br/><br/>If you think this is an error, please'
-                                +' <a href="https://github.com/OpenTreeOfLife/feedback/issues" target="_blank">create an issue in our bug tracker</a>.';
-                        // TODO: Explain in more detail: Why wasn't this used?
-                        showErrorInArgusViewer( errMsg );
-                    } else {
-                        errMsg = "Something went wrong on the server. Please wait a moment and reload this page.";
-                        showErrorInArgusViewer( errMsg, jqXHR.responseText );
-                    }
-                }
-            },
-            dataType: 'json'  // should return just the node ID (number)
-        });
-        */
     } else {
         // use ottol ID if we're browsing the taxonomy
         argus.displayNode({"nodeID": ottolID,
@@ -300,28 +261,6 @@ if (viewer !== 'feedback') {
             updateTreeView({'data': initialState});
         }
 
-        /*
-        // add splitter between argus + provenance panel (using jquery.splitter plugin)
-        var viewSplitter = $('#viewer-collection').split({
-            orientation:'vertical',
-            limit: 280,             // don't come closer than this to edge
-            position:'70%'          // initial position
-        });
-
-        // bind toggle for provenance panel
-        var lastViewSplitterPosition = viewSplitter.position();
-        $('#provenance-show').unbind('click').click(function() {
-            viewSplitter.position(lastViewSplitterPosition);
-            $(this).hide();
-            return false;
-        });
-        $('#provenance-hide').unbind('click').click(function() {
-            lastViewSplitterPosition = viewSplitter.position();
-            viewSplitter.position( viewSplitter.width() - 2 );
-            $('#provenance-show').show();
-            return false;
-        });
-        */
         $('#comments-hide').unbind('click').click(function() {
             toggleCommentsPanel('HIDE');
             return false;
@@ -803,24 +742,6 @@ function showObjectProperties( objInfo, options ) {
                 console.log(fullNode);
             }
         }
-        // var fullNodePartials = getPartialPathSourceIDs( fullNode );
-        // if (fullNodePartials) {
-        //     if (edgeSection) {
-        //         edgeSection.displayedProperties['??? trees'] = fullNodeConflicts;
-        //     } else {
-        //         console.log('>>> No edgeSection found for this node:');
-        //         console.log(fullNode);
-        //     }
-        // }
-        // var fullNodeTerminals = getTerminalSourceIDs( fullNode );
-        // if (fullNodeTerminals) {
-        //     if (edgeSection) {
-        //         edgeSection.displayedProperties['Supporting trees'] = fullNodeSupporters;
-        //     } else {
-        //         console.log('>>> No edgeSection found for this node:');
-        //         console.log(fullNode);
-        //     }
-        // }
         var fullNodeConflicts = getConflictingSourceIDs( fullNode );
         if (fullNodeConflicts) {
             if (edgeSection) {
@@ -1450,32 +1371,6 @@ $('a.btn-navbar[data-target=".nav-collapse"], a.dropdown-toggle').click(function
         500
     );
 });
-
-// examples of changing state (see also https://developer.mozilla.org/en-US/docs/DOM/Manipulating_the_browser_history)
-if (false) {
-    // pushState adds to history
-    History.pushState({state:1}, "State 1", "?state=1"); // logs {state:1}, "State 1", "?state=1"
-    History.pushState({state:2}, "State 2", "?state=2"); // logs {state:2}, "State 2", "?state=2"
-    // replaceState modifies the current history entry (no extra junk in Back/Fwd navigation)
-    History.replaceState({state:3}, "State 3", "?state=3"); // logs {state:3}, "State 3", "?state=3"
-
-    // NOTE that the state object can include anything, eg,
-    newState = {
-        viewer:'argus',
-        domSource:'ottol',
-        nodeID:'12321',
-        viewport:'24,201,0,800'
-    }
-    History.pushState(newState, "Something changed!", "?state=4"); // logs {}, '', "?state=4"
-    // Is a distinct URL needed to recover state from a pasted URL? How robust is this?
-
-    History.pushState(null, null, "?state=4"); // logs {}, '', "?state=4"
-
-    History.back(); // logs {state:3}, "State 3", "?state=3"
-    History.back(); // logs {state:1}, "State 1", "?state=1"
-    History.forward();
-    History.go(2); // this is *relative* to the current index (position) in history! ie, .go(-1) is the same at back()
-}
 
 function showErrorInArgusViewer( msg, details ) {
     var errorHTML;
