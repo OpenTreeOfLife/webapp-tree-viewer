@@ -23,11 +23,11 @@ def get_github_client_secret():
     if os.path.isfile(client_secret_path):
         GITHUB_CLIENT_SECRET = open(client_secret_path).read().strip()
         return GITHUB_CLIENT_SECRET
-    else:
-        abs_path = os.path.abspath(client_secret_path)
-        err_msg = f"Client secret file ({abs_path}) not found!"
-        print(err_msg)
-        raise Exception(err_msg)
+    abs_path = os.path.abspath(client_secret_path)
+    err_msg = f"Client secret file ({abs_path}) not found!"
+    _LOG.warn(err_msg)
+    # raise Exception(err_msg)
+    return None
 
 
 def get_copy_of_view_dict(request):
