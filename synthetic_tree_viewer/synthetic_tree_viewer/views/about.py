@@ -107,9 +107,17 @@ def about_misc(request):
 )
 def bibliographic_references(request):
     view_dict = _minimal_about_viewdict(request)
-    view_dict["contributing_studies"] = fetch_current_synthesis_source_data(request)
-    view_dict["latest_CrossRef_URL"] = latest_CrossRef_URL
-    view_dict["url_quote"] = quote
+    api_base_urls = view_dict["conf"]["api_base_urls"]
+    cpwu = api_base_urls["curation_production_webapp_url"]
+
+    view_dict.update(
+        {
+            "contributing_studies": fetch_current_synthesis_source_data(request),
+            "latest_CrossRef_URL": latest_CrossRef_URL,
+            "url_quote": quote,
+            "curation_production_webapp_url": cpwu,
+        }
+    )
     return view_dict
 
 

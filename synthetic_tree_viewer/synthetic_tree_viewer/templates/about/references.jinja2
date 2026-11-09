@@ -91,7 +91,7 @@ div.contributing-studies div.links .tree-links a {
               </div>
               <div class="span4 links">
                   <a target="_blank" 
-                     href="/curator/study/view/{{ study.get('ot:studyId') }}"
+                     href="{{ curation_production_webapp_url }}/study/view/{{ study.get('ot:studyId') }}"
                     >Open study in curator application</a>
                   <a href="#" onclick="toggleTreeLinks(this); return false;"
                       ><span>Show links to included trees</span> ({{ study['tree_ids'] | length }})</a>
@@ -103,7 +103,7 @@ div.contributing-studies div.links .tree-links a {
                      {% endfor %}
                   </div>
                   <a target="_blank" 
-                    href="/default/default/argus/ottol@{{ study.get('ot:focalClade') }}/{{ study.get('ot:focalCladeOTTTaxonName') }}"
+                    href="/opentree/argus/ottol@{{ study.get('ot:focalClade') }}/{{ study.get('ot:focalCladeOTTTaxonName') }}"
                     >Browse focal clade in synthetic tree</a>
                 <a target="_blank" href="{{ API_load_study_GET_url.replace('{STUDY_ID}', study.get('ot:studyId')) }}"
                     >Download current NexSON</a>
