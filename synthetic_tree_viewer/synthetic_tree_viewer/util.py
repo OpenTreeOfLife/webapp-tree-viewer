@@ -55,7 +55,7 @@ def get_conf(request):
 def get_domain_banner_text(subdomain):
     # Add an optional CSS banner to indicate a test domain, or none if
     # we're on a production server.
-    if subdomain == "tree":
+    if subdomain in ["tree", "browse"]:
         return ""
     # all other domains (including 'devtree.opentreeoflife.org') should present as dev servers
     return "DEVELOPMENT"
