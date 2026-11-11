@@ -64,7 +64,7 @@ def get_domain_banner_text(subdomain):
 def get_domain_banner_hovertext(subdomain):
     # Return optional hover-text for dev+test domains, or none if
     # we're on a production server.
-    if subdomain == "tree":
+    if subdomain in ["tree", "browse"]:
         return ""
     # all other domains (including 'devtree.opentreeoflife.org') should present as dev servers
     # N.B. Line lengths gradually change, since this text fits diagonally in the page corner.
