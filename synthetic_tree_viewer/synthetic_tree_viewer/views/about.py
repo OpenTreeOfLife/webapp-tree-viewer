@@ -1,8 +1,10 @@
 import json
 from datetime import datetime
 from urllib.parse import quote
+import os
 
 import bleach
+import logging
 import markdown
 import requests
 from bleach.sanitizer import Cleaner
@@ -17,6 +19,8 @@ from synthetic_tree_viewer.util import (
     get_opentree_api_endpoints,
     latest_CrossRef_URL,
 )
+
+_LOG = logging.getLogger(__name__)
 
 # Define a consistent cleaner to sanitize user input. We need a few
 # elements that are common in our markdown but missing from the Bleach
@@ -471,6 +475,9 @@ stats_folder = "./synthetic_tree_viewer/static/statistics"
 def fetch_local_synthesis_stats():
     # stats_folder = request.static_url('synthetic_tree_viewer:static/statistics')
     file_path = f"{stats_folder}/synthesis.json"
+    _LOG.info(
+        f"local_synthesis_stats from {file_path} which is {os.path.abspath(file_path)}"
+    )
     try:
         stats = open(file_path).read().strip()
         return stats
