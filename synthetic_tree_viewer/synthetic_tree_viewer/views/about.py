@@ -67,7 +67,7 @@ def _minimal_about_viewdict(request):
 def favicon_view(request):
     from pyramid.response import Response
 
-    favicon_path = "./synthetic_tree_viewer/static/favicon.ico"
+    favicon_path = "./synthetic_tree_viewer/synthetic_tree_viewer/static/favicon.ico"
     with open(favicon_path, "rb") as f:
         content = f.read()
     return Response(body=content, content_type="image/x-icon")
@@ -465,7 +465,7 @@ def progress(request):
     return view_dict
 
 
-stats_folder = "./synthetic_tree_viewer/static/statistics"
+stats_folder = "./synthetic_tree_viewer/synthetic_tree_viewer/static/statistics"
 
 
 def fetch_local_synthesis_stats():
