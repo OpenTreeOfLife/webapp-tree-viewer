@@ -67,16 +67,6 @@ def _minimal_about_viewdict(request):
     return view_dict
 
 
-@view_config(route_name="favicon")
-def favicon_view(request):
-    from pyramid.response import Response
-
-    favicon_path = "./synthetic_tree_viewer/static/favicon.ico"
-    with open(favicon_path, "rb") as f:
-        content = f.read()
-    return Response(body=content, content_type="image/x-icon")
-
-
 @view_config(
     route_name="about",
     renderer="synthetic_tree_viewer:templates/about/open_tree_of_life.jinja2",
@@ -469,7 +459,28 @@ def progress(request):
     return view_dict
 
 
-stats_folder = "./synthetic_tree_viewer/static/statistics"
+SYNTH_TREE_VIEW_ROOT = os.environ["SYNTH_TREE_VIEW_ROOT"]
+while SYNTH_TREE_VIEW_ROOT.endswith("/"):
+    SYNTH_TREE_VIEW_ROOT = SYNTH_TREE_VIEW_ROOT[:-1]
+assert SYNTH_TREE_VIEW_ROOT
+assert os.path.isdir(SYNTH_TREE_VIEW_ROOT)
+stats_folder = os.path.join(
+    SYNTH_TREE_VIEW_ROOT, "synthetic_tree_viewer/static/statistics"
+)
+assert stats_folder
+assert os.path.isdir(stats_folder)
+
+
+@view_config(route_name="favicon")
+def favicon_view(request):
+    from pyramid.response import Response
+
+    favicon_path = os.path.join(
+        SYNTH_TREE_VIEW_ROOT, "synthetic_tree_viewer/static/favicon.ico"
+    )
+    with open(favicon_path, "rb") as f:
+        content = f.read()
+    return Response(body=content, content_type="image/x-icon")
 
 
 def fetch_local_synthesis_stats():
