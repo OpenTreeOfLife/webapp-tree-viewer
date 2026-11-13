@@ -1226,7 +1226,7 @@ function showObjectProperties( objInfo, options ) {
             // when in doubt (e.g. nodes on the rootward path), offer the full download
             $details.append('<dt>Download subtree as Newick string temporarily unavailable</dt>');
             $details.append(//'<dd>This tree is too large to download through webservices. ' + 
-                           'See <a href="/about/synthesis_release">release notes</a> for download links</dd>');
+                           'See <a href="/about/synthesis-release">release notes</a> for download links</dd>');
         } else {
             $details.append('<dt><a id="extract-subtree" href="#">Download subtree as Newick string</a></dt>');
 
